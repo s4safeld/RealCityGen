@@ -8,6 +8,9 @@ public class SpawnPlatform : MonoBehaviour
     public GameObject spawnBlock;
     public GameObject spawnedBlock;
     public Camera mainCam;
+
+    public Material defMat;
+    public Material blackMat;
     
     private bool isSpawned = false;
     private bool isVisible = false;
@@ -28,7 +31,7 @@ public class SpawnPlatform : MonoBehaviour
         {
             if (!isSpawned && isVisible)
             {
-                spawnedBlock = Instantiate(spawnBlock, transform.position + new Vector3(0, 0.5f, 0), Quaternion.identity);
+                spawnedBlock = Instantiate(spawnBlock, transform.position + new Vector3(0, 0.5f, 0), Quaternion.identity, transform);
                 isSpawned = true;
             }
                 
@@ -40,8 +43,10 @@ public class SpawnPlatform : MonoBehaviour
         isVisible = true;
         if (Vector3.Distance(transform.position, mainCam.transform.position) <= 100 && isSpawned == false)
         {
-            spawnedBlock = Instantiate(spawnBlock, transform.position + new Vector3(0, 0.5f, 0), Quaternion.identity);
+            spawnedBlock = Instantiate(spawnBlock, transform.position + new Vector3(0, 0.5f, 0), Quaternion.identity, transform);
+            spawnedBlock.name = ("spawnblock" +spawnedBlock.transform.position);
             isSpawned = true;
+            
         } 
     }
     void OnBecameInvisible()
@@ -49,5 +54,12 @@ public class SpawnPlatform : MonoBehaviour
         isVisible = false;
         Destroy(spawnedBlock);
         isSpawned = false;
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.tag == "GridCell")
+        {
+            Destroy(this);
+        }
     }
 }

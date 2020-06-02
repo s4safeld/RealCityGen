@@ -18,14 +18,14 @@ public class PlayerMovement : MonoBehaviour
         {
             camTransform = Camera.main.transform;
             pm = this;
-        myCC = GetComponent<CharacterController>();
+            myCC = GetComponent<CharacterController>();
         }
         
 
         // Update is called once per frame
         void Update()
         {
-            //BasicMovement();
+            BasicMovement();
             BasicRotation(); 
         }
 
