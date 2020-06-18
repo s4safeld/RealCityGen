@@ -21,7 +21,7 @@ public class GridGenerator : MonoBehaviour
     private Vector3 spawnPosition;
     private globalInformation globalInformation;
     private Vector3 initPos;
-    private bool gridGiven = true;
+    private bool terrainGiven;
 
     void Start()
     {
@@ -30,11 +30,14 @@ public class GridGenerator : MonoBehaviour
         edgelength = get2DBounds(cell).x;
         
         spawnPosition = new Vector3(transform.position.x, 0, transform.position.z);
+        terrain = GameObject.Find("Terrain");
 
         grid = new GameObject();
+        grid.name = "Grid";
         Instantiate(grid);
 
-        terrain = GameObject.Find("Terrain");
+
+
         if (terrain)  //If Grid is not Null
         {
             Debug.Log("Terrain found, \nfilling Terrain...");
@@ -43,10 +46,7 @@ public class GridGenerator : MonoBehaviour
         }
         else
         {
-            
-            gridGiven = false;
-
-            Instantiate(grid);
+            //This is optional and will be done in the future, for now we will work on given Terrains
             Instantiate(cell, spawnPosition, Quaternion.identity, grid.transform);
 
             for (int i = 0; i < globalInformation.viewDistance / edgelength; i = i + 2)
@@ -62,10 +62,9 @@ public class GridGenerator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Debug.Log(Vector3.Distance(initPos, transform.position));
-        //Debug.Log(globalInformation.viewDistance / 2);
 
-        if (!gridGiven)
+        //For now we assume that a terrain is always given, so the Realtime Generation of a Grid is put on hold for now.
+        if (!terrain)
         {
             Debug.Log("This should not yet run, stop this now!");
             if (Vector3.Distance(initPos, transform.position) > 50)
@@ -108,12 +107,13 @@ public class GridGenerator : MonoBehaviour
         {
             for (float j = 0; j < length; j = j + edgelength*chunkSize)
             {
-                Debug.Log("Generating Chunk at: " + pos);
+                //Debug.Log("Generating Chunk at: " + pos);
                 generateChunk(chunkSize, edgelength, pos, grid.transform);
                 pos = new Vector3(pos.x+(edgelength*chunkSize), 0, pos.z);
             }
-            pos = new Vector3(pos.x, 0, pos.z + (edgelength * chunkSize));
+            pos = new Vector3((terrain.transform.position.x - width / 2), 0, pos.z + (edgelength * chunkSize));
         }
+        grid.transform.parent = terrain.transform;
     }
 
     /*
@@ -124,30 +124,35 @@ public class GridGenerator : MonoBehaviour
     Vector3 generateChunk(int size, float step, Vector3 pos, Transform parent)
     {
         //Debugging input variables
-        Debug.Log("size: " + size);
-        Debug.Log("step: " + step);
-        Debug.Log("obj: " + cell.name);
-        Debug.Log("pos old: " + pos);
+        //Debug.Log("size: " + size);
+        //Debug.Log("step: " + step);
+        //Debug.Log("obj: " + cell.name);
+        //Debug.Log("pos old: " + pos);
 
         
         pos = new Vector3(pos.x+edgelength/2,0,pos.z+edgelength/2);
-        Debug.Log("pos new: " + pos);
+        //Debug.Log("pos new: " + pos);
 
         GameObject spawned;
+        GameObject chunk = new GameObject();
+        chunk.name = "chunk" + pos;
+        chunk.transform.parent = parent;
+        //Instantiate(chunk);
 
         for (int i = 0; i<size; i++)
         {
             for (int j = 0; j < size; j++)
             {
-                //Instantiate(cell, pos, Quaternion.identity, chunk.transform);
-                spawned = Instantiate(cell, pos, Quaternion.identity, grid.transform);   //Instantiating cell, at given position with Grid as parent
+                spawned = Instantiate(cell, pos, Quaternion.identity);   //Instantiating cell, at given position with Grid as parent
                 spawned.name = (cell.name + pos);
-                Debug.Log("i: " + i + " || j: " + j + " || pos: " + pos);
+                spawned.transform.parent = chunk.transform;
+                //Debug.Log("i: " + i + " || j: " + j + " || pos: " + pos);
                 pos = new Vector3(pos.x + step, 0, pos.z);  //step left
                 
             }
             pos = new Vector3(pos.x-(size*step), 0, pos.z+step);    //return to zero and step up
         }
+        
         return pos;
     }
     /*

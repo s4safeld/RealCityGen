@@ -231,8 +231,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 105fc4ecd685a1949810a07c5f68600d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cell: {fileID: 6930349144100770553, guid: e8795d24037271d42bc918e89bb19b95, type: 3}
-  terrain: {fileID: 0}
+  cell: {fileID: 1862018284774071965, guid: fae075621a625aa4f8fa023683bad0ab, type: 3}
+  terrain: {fileID: 931239817}
   chunkSize: 5
 --- !u!143 &898627947
 CharacterController:
@@ -252,6 +252,33 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &898627948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 898627945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f8b2e154f0138a4c8dd075a3f0e768e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cam: {fileID: 0}
+  upperDistance: 8.5
+  lowerDistance: 12
+--- !u!114 &898627949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 898627945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d6b525702d223d4e937f38843cd3640, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &931239817
 GameObject:
   m_ObjectHideFlags: 0
