@@ -93,23 +93,22 @@ public class GridGenerator : MonoBehaviour
 
     void fillTerrain(GameObject cell, GameObject grid, GameObject terrain)
     {
-        float width = globalInformation.get2DBounds(terrain).x;
-        Debug.Log("width of grid: " + width);
-        float length = globalInformation.get2DBounds(terrain).y;
-        Debug.Log("length of grid: " + length);
 
-        Vector3 pos = new Vector3(terrain.transform.position.x-width/2, 0, terrain.transform.position.z-length/2);
+        Debug.Log("width of terrain: " + globalInformation.terrainSize.x);
+        Debug.Log("length of terrain: " + globalInformation.terrainSize.y);
+
+        Vector3 pos = new Vector3(terrain.transform.position.x- globalInformation.terrainSize.x/2, 0, terrain.transform.position.z- globalInformation.terrainSize.y / 2);
         Debug.Log("corner of Grid: " + pos);
 
-        for(float i = 0; i < width; i=i+edgelength*chunkIterations)
+        for(float i = 0; i < globalInformation.terrainSize.x; i= i + edgelength * chunkIterations)
         {
-            for (float j = 0; j < length; j = j + edgelength*chunkIterations)
+            for (float j = 0; j < globalInformation.terrainSize.y; j = j + edgelength * chunkIterations)
             {
                 //Debug.Log("Generating Chunk at: " + pos);
                 generateChunk(chunkIterations, edgelength, pos, grid.transform);
-                pos = new Vector3(pos.x+(edgelength*chunkIterations), 0, pos.z);
+                pos = new Vector3(pos.x+(edgelength * chunkIterations), 0, pos.z);
             }
-            pos = new Vector3((terrain.transform.position.x - width / 2), 0, pos.z + (edgelength * chunkIterations));
+            pos = new Vector3((terrain.transform.position.x - globalInformation.terrainSize.x / 2), 0, pos.z + (edgelength * chunkIterations));
         }
         //grid.transform.parent = terrain.transform;
     }
@@ -135,6 +134,7 @@ public class GridGenerator : MonoBehaviour
         GameObject chunk = new GameObject();
         chunk.name = "chunk" + pos;
         chunk.transform.parent = parent;
+        globalInformation.chunksTotal++;
         //Instantiate(chunk);
 
         for (int i = 0; i<size; i++)
@@ -144,6 +144,7 @@ public class GridGenerator : MonoBehaviour
                 spawned = Instantiate(cell, pos, Quaternion.identity);   //Instantiating cell, at given position with Grid as parent
                 spawned.name = (cell.name + pos);
                 spawned.transform.parent = chunk.transform;
+                globalInformation.cellsTotal++;
                 //Debug.Log("i: " + i + " || j: " + j + " || pos: " + pos);
                 pos = new Vector3(pos.x + step, 0, pos.z);  //step left
                 

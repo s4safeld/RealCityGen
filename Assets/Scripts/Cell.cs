@@ -26,7 +26,7 @@ public class Cell : MonoBehaviour
         cellCollider = globalInformation.cellCollider;
         mainCam = Camera.main;
         camTransform = mainCam.gameObject.transform;
-        groundCursor = mainCam.GetComponent<PlayerMovement>().groundCursor.transform;
+        groundCursor = globalInformation.groundCursor.transform;
     }
     public void Update()
     {
@@ -42,11 +42,15 @@ public class Cell : MonoBehaviour
             {
                 if (isInView())
                 {
+                    if(!generated)
+                        globalInformation.cellsVisible++;
                     //Debug.DrawLine(transform.position, groundCursor.position, Color.white);
                     Generate();
                 }
                 else
                 {
+                    if(generated)
+                        globalInformation.cellsVisible--;
                     unGenerate();
                 }
             }
