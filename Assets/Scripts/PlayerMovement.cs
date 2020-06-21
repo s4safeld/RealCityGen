@@ -1,11 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
         private CharacterController myCC;
-
+        public GameObject groundCursor;
         private PlayerMovement pm;
 
         Transform camTransform;
@@ -16,6 +17,8 @@ public class PlayerMovement : MonoBehaviour
 
         private void Start()
         {
+            groundCursor = Instantiate(new GameObject(), new Vector3(transform.position.x, 0, transform.position.z), transform.rotation);
+            groundCursor.name = "groundCursor";
             camTransform = Camera.main.transform;
             pm = this;
             myCC = GetComponent<CharacterController>();
@@ -26,7 +29,8 @@ public class PlayerMovement : MonoBehaviour
         void Update()
         {
             BasicMovement();
-            BasicRotation(); 
+            BasicRotation();
+            Debug.DrawLine(groundCursor.transform.position, transform.position, Color.white);
         }
 
         void BasicMovement()
@@ -35,18 +39,22 @@ public class PlayerMovement : MonoBehaviour
             if (Input.GetKey(KeyCode.W))
             {
                 myCC.Move(transform.forward * Time.deltaTime * movementSpeed);
+                groundCursor.transform.position = new Vector3(transform.position.x,0,transform.position.z);
             }
             if (Input.GetKey(KeyCode.A))
             {
                 myCC.Move(-transform.right * Time.deltaTime * movementSpeed);
+                groundCursor.transform.position = new Vector3(transform.position.x, 0, transform.position.z);
             }
             if (Input.GetKey(KeyCode.S))
             {
                 myCC.Move(-transform.forward * Time.deltaTime * movementSpeed);
+                groundCursor.transform.position = new Vector3(transform.position.x, 0, transform.position.z);
             }
             if (Input.GetKey(KeyCode.D))
             {
                 myCC.Move(transform.right * Time.deltaTime * movementSpeed);
+                groundCursor.transform.position = new Vector3(transform.position.x, 0, transform.position.z);
             }
             if (Input.GetKey(KeyCode.Space))
             {
@@ -56,9 +64,6 @@ public class PlayerMovement : MonoBehaviour
             {
                 myCC.Move(-transform.up * Time.deltaTime * movementSpeed);
             }
-
-
-
         }
 
         void BasicRotation()
@@ -68,8 +73,9 @@ public class PlayerMovement : MonoBehaviour
                 float mouseX = Input.GetAxis("Mouse X") * Time.deltaTime * rotationSpeed;
                 float mouseY = Input.GetAxis("Mouse Y") * Time.deltaTime * rotationSpeed;
                 transform.Rotate(new Vector3(0, mouseX, 0));
+                groundCursor.transform.Rotate(new Vector3(0, mouseX, 0));
                 //Debug.Log(camTransform.localRotation.x);
-                if (camTransform.localRotation.x < 0.7 && camTransform.localRotation.x > -0.7)
+            if (camTransform.localRotation.x < 0.7 && camTransform.localRotation.x > -0.7)
                 {
                     camTransform.Rotate(new Vector3(-mouseY, 0, 0));
                 }
@@ -93,6 +99,7 @@ public class PlayerMovement : MonoBehaviour
             if (Input.GetKey(KeyCode.LeftArrow))
             {
                 transform.Rotate(new Vector3(0, Mathf.Clamp(-1, -10000, 10000), 0));
+                groundCursor.transform.Rotate(new Vector3(0, Mathf.Clamp(-1, -10000, 10000), 0));
             }
             if (Input.GetKey(KeyCode.DownArrow))
             {
@@ -101,6 +108,7 @@ public class PlayerMovement : MonoBehaviour
             if (Input.GetKey(KeyCode.RightArrow))
             {
                 transform.Rotate(new Vector3(0, Mathf.Clamp(1, -10000, 10000), 0));
+                groundCursor.transform.Rotate(new Vector3(0, Mathf.Clamp(1, -10000, 10000), 0));
             }
 
         }

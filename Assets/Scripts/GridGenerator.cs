@@ -13,107 +13,105 @@ using System.Linq;
 public class GridGenerator : MonoBehaviour
 {
     
-    public GameObject cell;
+    private GameObject cell;
     private GameObject grid;
-    public GameObject terrain;
-    public int chunkSize = 5;
+    private GameObject terrain;
+    private int chunkIterations;
     private float edgelength;
     private Vector3 spawnPosition;
-    private globalInformation globalInformation;
+    //private globalInformation globalInformation;
     private Vector3 initPos;
     private bool terrainGiven;
+    private bool initialized;
 
-    void Start()
+    public void Initialise()
     {
-        globalInformation = GameObject.Find("globalInformation").GetComponent<globalInformation>();
-       
-        edgelength = get2DBounds(cell).x;
-        
-        spawnPosition = new Vector3(transform.position.x, 0, transform.position.z);
-        terrain = GameObject.Find("Terrain");
+        //globalInformation = GameObject.Find("globalInformation").GetComponent<globalInformation>();
 
-        grid = new GameObject();
-        grid.name = "Grid";
-        Instantiate(grid);
+            cell = globalInformation.cell;
+            edgelength = globalInformation.edgelength;
+            spawnPosition = new Vector3(transform.position.x, 0, transform.position.z);
+            terrain = globalInformation.Terrain;
+            chunkIterations = globalInformation.chunkIterations;
+
+            grid = new GameObject();
+            grid.name = "Grid";
+            Instantiate(grid);
 
 
 
-        if (terrain)  //If Grid is not Null
-        {
-            Debug.Log("Terrain found, \nfilling Terrain...");
-            fillTerrain(cell, grid, terrain);
-            //generateChunk(chunkSize, edgelength, gameObject.transform.position, grid.transform);
-        }
-        else
-        {
-            //This is optional and will be done in the future, for now we will work on given Terrains
-            Instantiate(cell, spawnPosition, Quaternion.identity, grid.transform);
-
-            for (int i = 0; i < globalInformation.viewDistance / edgelength; i = i + 2)
+            if (terrain)  //If Grid is not Null
             {
-                spawnPosition = generateChunk(chunkSize, edgelength, spawnPosition, grid.transform);
+                Debug.Log("Terrain found, \nfilling Terrain...");
+                fillTerrain(cell, grid, terrain);
+                //generateChunk(chunkIterations, edgelength, gameObject.transform.position, grid.transform);
             }
+            else
+            {
+                //This is optional and will be done in the future, for now we will work on given Terrains
+                Instantiate(cell, spawnPosition, Quaternion.identity, grid.transform);
 
-            initPos = transform.position;
-        }
-        
+                for (int i = 0; i < globalInformation.viewDistance / edgelength; i = i + 2)
+                {
+                    spawnPosition = generateChunk(chunkIterations, edgelength, spawnPosition, grid.transform);
+                }
+
+                initPos = transform.position;
+            }
+            initialized = true;
     }
 
     // Update is called once per frame
     void Update()
     {
-
-        //For now we assume that a terrain is always given, so the Realtime Generation of a Grid is put on hold for now.
-        if (!terrain)
+        if (initialized)
         {
-            Debug.Log("This should not yet run, stop this now!");
-            if (Vector3.Distance(initPos, transform.position) > 50)
+            //For now we assume that a terrain is always given, so the Realtime Generation of a Grid is put on hold for now.
+            if (!terrain)
             {
-                initPos = transform.position;
-                Debug.Log("Loading point reached");
-                RaycastHit hit;
-                if (Physics.Raycast(transform.position, Vector3.down, out hit))
+                Debug.Log("This should not yet run, stop this now!");
+                if (Vector3.Distance(initPos, transform.position) > 50)
                 {
-                    spawnPosition = getGridCell(hit.collider.gameObject).transform.position;
-                    initPos = spawnPosition;
-                }
-                for (int i = 0; i < globalInformation.viewDistance / edgelength; i = i + 2)
-                {
-                    spawnPosition = generateChunk(chunkSize, edgelength, spawnPosition, grid.transform);
-                }
+                    initPos = transform.position;
+                    Debug.Log("Loading point reached");
+                    RaycastHit hit;
+                    if (Physics.Raycast(transform.position, Vector3.down, out hit))
+                    {
+                        spawnPosition = getGridCell(hit.collider.gameObject).transform.position;
+                        initPos = spawnPosition;
+                    }
+                    for (int i = 0; i < globalInformation.viewDistance / edgelength; i = i + 2)
+                    {
+                        spawnPosition = generateChunk(chunkIterations, edgelength, spawnPosition, grid.transform);
+                    }
 
+                }
             }
         }
         
     }
 
-    Vector2 get2DBounds(GameObject obj)
-    {
-        Bounds bounds = obj.GetComponent<MeshFilter>().sharedMesh.bounds;
-        return new Vector2(obj.transform.localScale.x * bounds.size.x, obj.transform.localScale.z * bounds.size.z);
-    }
-
     void fillTerrain(GameObject cell, GameObject grid, GameObject terrain)
     {
-        float width = get2DBounds(terrain).x;
+        float width = globalInformation.get2DBounds(terrain).x;
         Debug.Log("width of grid: " + width);
-        float length = get2DBounds(terrain).y;
+        float length = globalInformation.get2DBounds(terrain).y;
         Debug.Log("length of grid: " + length);
 
         Vector3 pos = new Vector3(terrain.transform.position.x-width/2, 0, terrain.transform.position.z-length/2);
         Debug.Log("corner of Grid: " + pos);
 
-        for(float i = 0; i < width; i=i+edgelength*chunkSize)
+        for(float i = 0; i < width; i=i+edgelength*chunkIterations)
         {
-            for (float j = 0; j < length; j = j + edgelength*chunkSize)
+            for (float j = 0; j < length; j = j + edgelength*chunkIterations)
             {
                 //Debug.Log("Generating Chunk at: " + pos);
-                generateChunk(chunkSize, edgelength, pos, grid.transform);
-                pos = new Vector3(pos.x+(edgelength*chunkSize), 0, pos.z);
+                generateChunk(chunkIterations, edgelength, pos, grid.transform);
+                pos = new Vector3(pos.x+(edgelength*chunkIterations), 0, pos.z);
             }
-            pos = new Vector3((terrain.transform.position.x - width / 2), 0, pos.z + (edgelength * chunkSize));
+            pos = new Vector3((terrain.transform.position.x - width / 2), 0, pos.z + (edgelength * chunkIterations));
         }
-        grid.transform.parent = terrain.transform;
+        //grid.transform.parent = terrain.transform;
     }
 
     /*
@@ -155,54 +153,7 @@ public class GridGenerator : MonoBehaviour
         
         return pos;
     }
-    /*
-    Vector3 loopSpawn(int rad, float step, GameObject obj, Vector3 pos, Transform parent)
-    {
-        GameObject spawned;
-        pos = new Vector3(pos.x + step, 0, pos.z);
-        spawned = Instantiate(obj, pos, Quaternion.identity, parent);
-        spawned.name = (obj.name + pos);
-        for (int i = 0; i <= rad; i++)
-        {
-            pos = new Vector3(pos.x, 0, pos.z + step);
-            spawned = Instantiate(obj, pos, Quaternion.identity, parent);
-            spawned.name = (obj.name + pos);
-        }
-        for (int i = 0; i <= rad / 2; i++)
-        {
-            pos = new Vector3(pos.x - step, 0, pos.z);
-            spawned = Instantiate(obj, pos, Quaternion.identity, parent);
-            spawned.name = (obj.name + pos);
-
-            pos = new Vector3(pos.x - step, 0, pos.z);
-            spawned = Instantiate(obj, pos, Quaternion.identity, parent);
-            spawned.name = (obj.name + pos);
-        }
-        for (int i = 0; i <= rad / 2; i++)
-        {
-            pos = new Vector3(pos.x, 0, pos.z - step);
-            spawned = Instantiate(obj, pos, Quaternion.identity, parent);
-            spawned.name = (obj.name + pos);
-
-            pos = new Vector3(pos.x, 0, pos.z - step);
-            spawned = Instantiate(obj, pos, Quaternion.identity, parent);
-            spawned.name = (obj.name + pos);
-        }
-        for (int i = 0; i <= rad / 2; i++)
-        {
-            pos = new Vector3(pos.x + step, 0, pos.z);
-            spawned = Instantiate(obj, pos, Quaternion.identity, parent);
-            spawned.name = (obj.name + pos);
-
-            pos = new Vector3(pos.x + step, 0, pos.z);
-            spawned = Instantiate(obj, pos, Quaternion.identity, parent);
-            spawned.name = (obj.name + pos);
-        }
-
-        return pos;
-
-    }
-    */
+    
     GameObject getGridCell(GameObject obj)
     {
         Debug.Log(obj.name);

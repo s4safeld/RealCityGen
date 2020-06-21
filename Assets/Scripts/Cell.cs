@@ -6,61 +6,104 @@ using System.IO;
 public class Cell : MonoBehaviour
 {
     public GameObject spawnBlock;
-    public GameObject spawnedBlock;
-    public Camera mainCam;
+    private GameObject spawnedBlock;
+    private Camera mainCam;
+    private GameObject cellCollider;
+    private Transform camTransform;
+    private Transform groundCursor;
+    private ArrayList colliders;
 
-    public Material defMat;
-    public Material blackMat;
+    private bool generated = false;
+    private bool generationAllowed;
+    private bool initialized = true;
 
-    private bool isSpawned = false;
-    private bool isVisible = false;
-    //private int viewDistance;
+    private float distance;
+
 
     private void Start()
     {
+        generationAllowed = true;   //Temporary
+        cellCollider = globalInformation.cellCollider;
         mainCam = Camera.main;
+        camTransform = mainCam.gameObject.transform;
+        groundCursor = mainCam.GetComponent<PlayerMovement>().groundCursor.transform;
     }
     public void Update()
     {
-        if (Vector3.Distance(transform.position, mainCam.transform.position) >= 100)
+        distance = Vector3.Distance(groundCursor.position, transform.position);
+
+        if(generationAllowed && distance < globalInformation.viewDistance)
         {
-            Destroy(spawnedBlock);
-            isSpawned = false;
+            if(distance < globalInformation.edgelength*2)
+            {
+                Generate();
+            }
+            else
+            {
+                if (isInView())
+                {
+                    //Debug.DrawLine(transform.position, groundCursor.position, Color.white);
+                    Generate();
+                }
+                else
+                {
+                    unGenerate();
+                }
+            }
         }
         else
         {
-            if (!isSpawned && isVisible)
+            unGenerate();
+        }
+        StartCoroutine(DisableScript());
+    }
+
+    void Generate()
+    {
+        if (!initialized)
+        {
+            StartCoroutine(Initialise());
+        }
+        else
+        {
+            if (generationAllowed && !generated)
             {
-                spawnedBlock = Instantiate(spawnBlock, transform.position + new Vector3(0, 0.5f, 0), Quaternion.identity, transform);
-                isSpawned = true;
+                spawnedBlock = Instantiate(spawnBlock,transform.position, Quaternion.identity , transform);
+                generated = true;
             }
-
         }
     }
-
-    void OnBecameVisible()
+    void unGenerate()
     {
-        Debug.Log(gameObject.name + " became Visible");
-        isVisible = true;
-        if (Vector3.Distance(transform.position, mainCam.transform.position) <= 100 && isSpawned == false)
-        {
-            spawnedBlock = Instantiate(spawnBlock, transform.position + new Vector3(0, 0.5f, 0), Quaternion.identity, transform);
-            spawnedBlock.name = ("spawnblock" + spawnedBlock.transform.position);
-            isSpawned = true;
-
-        }
-    }
-    void OnBecameInvisible()
-    {
-        isVisible = false;
         Destroy(spawnedBlock);
-        isSpawned = false;
+        generated = false;
     }
-    private void OnCollisionEnter(Collision collision)
+
+    bool isInView()
     {
-        if (collision.gameObject.tag == "GridCell")
+        Vector3 targetDir = transform.position - groundCursor.position;
+        float angle = Vector3.Angle(targetDir, groundCursor.forward);
+
+        if (angle < (mainCam.fieldOfView))
         {
-            Destroy(this);
+            return true;
         }
+        return false;
+    }
+    IEnumerator Initialise()
+    {
+        Debug.Log("Initialising");
+        Instantiate(cellCollider);
+        yield return new WaitForSeconds(.01f);
+        generationAllowed = cellCollider.GetComponent<GetColliders>().generationAllowed;
+        colliders = cellCollider.GetComponent<GetColliders>().colliders;
+        Destroy(cellCollider);
+        initialized = true;      
+    }
+    IEnumerator DisableScript()
+    {
+        this.enabled = false;
+        yield return new WaitForSeconds(.1f);
+        this.enabled = true;
     }
 }
