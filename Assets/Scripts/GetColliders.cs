@@ -5,16 +5,39 @@ using UnityEngine;
 public class GetColliders : MonoBehaviour
 {
     public ArrayList colliders = new ArrayList();
-    public bool generationAllowed = true;
+    public bool generationAllowed = false;
 
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("Collider found");
-        if(!(collision.collider.tag == "ignore"))
+        if(collision.collider.tag != "ignore")
         {
-            Debug.Log("Collider found");
+            Debug.Log("Collision enter: " + collision.collider.name);
             generationAllowed = false;
             colliders.Add(collision.collider);
         }   
+    }
+    private void OnCollisionExit(Collision collision)
+    {
+        if(collision.collider.tag != "ignore")
+        {
+            Debug.Log("Collision exit: " + collision.collider.name);
+            colliders.Remove(collision.collider);
+            if(colliders.Count == 0)
+            {
+                generationAllowed = true;
+            }
+        }
+    }
+    public bool ask()
+    {
+        if (generationAllowed)
+        {
+            Debug.Log("no Collision found");
+        }
+        else
+        {
+            Debug.Log("Collision found");
+        }
+        return generationAllowed;
     }
 }

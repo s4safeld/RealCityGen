@@ -20,9 +20,12 @@ public class PlayerMovement : MonoBehaviour
             initialized = true;
             movementSpeed = globalInformation.MovementSpeed;
             rotationSpeed = globalInformation.RotationSpeed;
+            if (!groundCursor)
+            {
+                groundCursor = Instantiate(new GameObject(), new Vector3(transform.position.x, 0, transform.position.y), Quaternion.identity, transform).transform;
+            }
         }
         
-
         // Update is called once per frame
         void Update()
         {
@@ -96,21 +99,21 @@ public class PlayerMovement : MonoBehaviour
             }
             if (Input.GetKey(KeyCode.UpArrow))
             {
-                camTransform.Rotate(new Vector3(Mathf.Clamp(-1, -0.7f, 0.7f), 0, 0));
+                camTransform.Rotate(new Vector3(Mathf.Clamp(-1, -0.7f, 0.7f) * Time.deltaTime * rotationSpeed, 0, 0));
             }
             if (Input.GetKey(KeyCode.LeftArrow))
             {
-                transform.Rotate(new Vector3(0, Mathf.Clamp(-1, -10000, 10000), 0));
-                groundCursor.Rotate(new Vector3(0, Mathf.Clamp(-1, -10000, 10000), 0));
+                transform.Rotate(new Vector3(0, Mathf.Clamp(-1, -10000, 10000) * Time.deltaTime * rotationSpeed, 0));
+                groundCursor.rotation = transform.rotation;
             }
             if (Input.GetKey(KeyCode.DownArrow))
             {
-                camTransform.Rotate(new Vector3(Mathf.Clamp(1, -0.7f, 0.7f), 0, 0));
+                camTransform.Rotate(new Vector3(Mathf.Clamp(1, -0.7f, 0.7f) * Time.deltaTime * rotationSpeed, 0, 0));
             }
             if (Input.GetKey(KeyCode.RightArrow))
             {
-                transform.Rotate(new Vector3(0, Mathf.Clamp(1, -10000, 10000), 0));
-                groundCursor.Rotate(new Vector3(0, Mathf.Clamp(1, -10000, 10000), 0));
+                transform.Rotate(new Vector3(0, Mathf.Clamp(1, -10000, 10000) * Time.deltaTime * rotationSpeed, 0));
+                groundCursor.rotation = transform.rotation;
             }
 
         }

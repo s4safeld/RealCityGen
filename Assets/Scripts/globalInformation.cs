@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
+using System;
 
 public class globalInformation : MonoBehaviour
 {
@@ -15,24 +16,35 @@ public class globalInformation : MonoBehaviour
     public int setRotationSpeed;
     public GameObject Player;
     public Canvas CanvasUI;
+    public string SetSeed;
+    public GameObject SetgroundCursor;
+    public float setMaxBuildingHeigth;
+    public float setMaxBuildingWidth;
+    public float setMaxBuildingLength;
 
     public static bool initialised = false;
-    public static int chunksTotal;
-    public static int cellsTotal;
-    public static int cellsVisible;
-    public static int viewDistance;
-    public static int chunkIterations;
-    public static int MovementSpeed;
-    public static int RotationSpeed;
+    public static int chunksTotal = 0;
+    public static int cellsTotal = 0;
+    public static int cellsVisible = 0;
+    public static int viewDistance = 0;
+    public static int chunkIterations = 0;
+    public static int MovementSpeed = 0;
+    public static int RotationSpeed = 0;
     public static Vector2 terrainSize;
-    public static float chunkSize;
-    public static float edgelength;
+    public static float chunkSize = 0;
+    public static float edgelength = 0;
     public static Vector3 position;
     public static GameObject cell;
     public static GameObject cellCollider;
     public static GameObject Terrain;
     public static Transform groundCursor;
     public static GridGenerator GridGenerator;
+    public static GameObject Grid;
+    public static Vector3[] chunks;
+    public static int seed;
+    public static float maxBuildingHeigth;
+    public static float maxBuildingWidth;
+    public static float maxBuildingLength;
 
     private Text ChunksTotalUI;
     private Text CellsTotalUI;
@@ -46,9 +58,13 @@ public class globalInformation : MonoBehaviour
     private Text EdglengthUI;
     private Text PositionUI;
     private Text FPSUI;
+    private Text seedUI;
 
     private float fps;
     private bool fpsThreadRunning = false;
+
+    //Debugging
+    public static bool chunksFull = false;
 
     private void Start()
     {
@@ -60,14 +76,32 @@ public class globalInformation : MonoBehaviour
         Terrain = setTerrain;
         MovementSpeed = setMovementSpeed;
         RotationSpeed = setRotationSpeed;
-
+        groundCursor = SetgroundCursor.transform;
+        maxBuildingHeigth = setMaxBuildingHeigth;
+        maxBuildingLength = setMaxBuildingLength;
+        maxBuildingWidth = setMaxBuildingWidth;
+            
         //compute left statics
         GridGenerator = Player.GetComponent<GridGenerator>();
         edgelength = setCellCollider.GetComponent<BoxCollider>().size.x;
         chunkSize = chunkIterations * edgelength;
-        groundCursor = Instantiate(new GameObject(), new Vector3(Player.transform.position.x, 0, Player.transform.position.z), Player.transform.rotation).transform;
-        groundCursor.gameObject.name = "groundCursor";
         terrainSize = get2DBounds(Terrain);
+        Grid = new GameObject();
+        Grid.name = "Grid";
+        Instantiate(Grid);
+        chunks = new Vector3[(int)((viewDistance/chunkSize)*(viewDistance/chunkSize))];
+        for (int i = 0; i < chunks.Length; i++)
+        {
+            chunks[i] = new Vector3(0,1,0);
+        }
+        if (SetSeed != null || SetSeed != " ")
+        {
+            try { seed = int.Parse(SetSeed); } catch (Exception) { seed = SetSeed.GetHashCode(); }
+        }
+        else
+        {
+            seed = UnityEngine.Random.Range(0, 10000000).GetHashCode();
+        }
 
         //Call Initialize Functions for all scripts that need globalInformationValues
         Player.GetComponent<PlayerMovement>().Initialise();
@@ -86,6 +120,7 @@ public class globalInformation : MonoBehaviour
         EdglengthUI         = CanvasUI.transform.GetChild(0).gameObject.transform.GetChild(9).GetComponent<Text>();
         PositionUI          = CanvasUI.transform.GetChild(0).gameObject.transform.GetChild(10).GetComponent<Text>();
         FPSUI               = CanvasUI.transform.GetChild(0).gameObject.transform.GetChild(11).GetComponent<Text>();
+        seedUI              = CanvasUI.transform.GetChild(0).gameObject.transform.GetChild(12).GetComponent<Text>();
     }
 
     public static Vector2 get2DBounds(GameObject obj)
@@ -114,12 +149,47 @@ public class globalInformation : MonoBehaviour
         ChunkSizeUI.text = "ChunkSize" + chunkSize;
         EdglengthUI.text = "Edglength: " + edgelength;
         PositionUI.text = "Position: X:" + position.x.ToString("0.00") + " Y: " + position.y.ToString("0.00") + " Z: " + position.z.ToString("0.00");
-        FPSUI.text = "aproximate FPS: " + fps;
+        FPSUI.text = "aproximate FPS: " + fps.ToString("0.00");
+        seedUI.text = "Seed: " + seed;
+
+        //Debugging stuff
+        
     }
     IEnumerator calculateFPS()
     {
         fps = 1.0f / Time.deltaTime;
         yield return new WaitForSeconds(.5f);
         fpsThreadRunning = false;
+    }
+    public static void addChunk(Vector3 input)
+    {
+        for (int i = 0; i < chunks.Length; i++)
+        {
+            if (chunks[i] == input)
+            {
+                Debug.Log("Chunk at: " + input + " is Already in Array");
+                return;
+            }
+        }
+        for (int i = 0; i<chunks.Length; i++)
+        {
+            if (chunks[i] == new Vector3(0,1,0))
+            {
+                chunks[i] = input;
+                return;
+            }
+        }
+        Debug.LogError("globalInformation.addChunk(): chunk Array is Full. GridGeneration can not continue!");
+    }
+    public static void removeChunk(Vector3 input)
+    {
+        for (int i = 0; i < chunks.Length; i++)
+        {
+            if (chunks[i] == input)
+            {
+                chunks[i] = new Vector3(0,1,0);
+            }
+        }
+        Debug.LogWarning("globalInformation.removeChunk(): chunk at: " + input + " not found!");
     }
 }
