@@ -62,11 +62,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\FindColliders.cs" />
+    <Compile Include="Assets\Scripts\Building.cs" />
     <Compile Include="Assets\Scripts\Cell.cs" />
+    <Compile Include="Assets\Scripts\CellCollider.cs" />
     <Compile Include="Assets\Scripts\CreateMeshCollider.cs" />
     <Compile Include="Assets\Scripts\DrawFrustumCorners.cs" />
-    <Compile Include="Assets\Scripts\GetColliders.cs" />
     <Compile Include="Assets\Scripts\GridGenerator.cs" />
     <Compile Include="Assets\Scripts\PlayerMovement.cs" />
     <Compile Include="Assets\Scripts\globalInformation.cs" />

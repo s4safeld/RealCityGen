@@ -21,6 +21,10 @@ public class globalInformation : MonoBehaviour
     public float setMaxBuildingHeigth;
     public float setMaxBuildingWidth;
     public float setMaxBuildingLength;
+    public float setMinBuildingHeigth;
+    public float setMinBuildingWidth;
+    public float setMinBuildingLength;
+    public int setDensity;
 
     public static bool initialised = false;
     public static int chunksTotal = 0;
@@ -45,6 +49,13 @@ public class globalInformation : MonoBehaviour
     public static float maxBuildingHeigth;
     public static float maxBuildingWidth;
     public static float maxBuildingLength;
+    public static float minBuildingHeigth;
+    public static float minBuildingWidth;
+    public static float minBuildingLength;
+    public static GameObject[,] cellArray;
+    public static float fov;
+    public static int possibleCellsInViewDistance;
+    public static int density;
 
     private Text ChunksTotalUI;
     private Text CellsTotalUI;
@@ -71,7 +82,7 @@ public class globalInformation : MonoBehaviour
         //set all statics
         viewDistance = setViewDistance;
         cell = setCell;
-        cellCollider = setCellCollider;
+        cellCollider = Instantiate(setCellCollider);
         chunkIterations = setChunkIterations;
         Terrain = setTerrain;
         MovementSpeed = setMovementSpeed;
@@ -80,21 +91,28 @@ public class globalInformation : MonoBehaviour
         maxBuildingHeigth = setMaxBuildingHeigth;
         maxBuildingLength = setMaxBuildingLength;
         maxBuildingWidth = setMaxBuildingWidth;
-            
+        minBuildingHeigth = setMinBuildingHeigth;
+        minBuildingLength = setMinBuildingLength;
+        minBuildingWidth = setMinBuildingWidth;
+        density = setDensity;  
+        
         //compute left statics
         GridGenerator = Player.GetComponent<GridGenerator>();
         edgelength = setCellCollider.GetComponent<BoxCollider>().size.x;
         chunkSize = chunkIterations * edgelength;
-        terrainSize = get2DBounds(Terrain);
+        try { terrainSize = get2DBounds(Terrain); } catch(Exception) { Debug.LogWarning("It seems that Terrain has not been initialized, continuing with realtime generation Algorithm"); }
         Grid = new GameObject();
         Grid.name = "Grid";
         Instantiate(Grid);
         chunks = new Vector3[(int)((viewDistance/chunkSize)*(viewDistance/chunkSize))];
+        fov = Camera.main.fieldOfView;
+        possibleCellsInViewDistance = (int)(viewDistance / edgelength);
         for (int i = 0; i < chunks.Length; i++)
         {
             chunks[i] = new Vector3(0,1,0);
         }
-        if (SetSeed != null || SetSeed != " ")
+        Debug.Log("SetSeed contains null: "+SetSeed.Contains("null"));
+        if (!SetSeed.Contains("null"))
         {
             try { seed = int.Parse(SetSeed); } catch (Exception) { seed = SetSeed.GetHashCode(); }
         }
@@ -102,6 +120,7 @@ public class globalInformation : MonoBehaviour
         {
             seed = UnityEngine.Random.Range(0, 10000000).GetHashCode();
         }
+
 
         //Call Initialize Functions for all scripts that need globalInformationValues
         Player.GetComponent<PlayerMovement>().Initialise();
@@ -131,6 +150,9 @@ public class globalInformation : MonoBehaviour
 
     private void Update()
     {
+        //Debugging stuff
+        //---------------
+
         if (!fpsThreadRunning)
         {
             fpsThreadRunning = true;
@@ -138,7 +160,8 @@ public class globalInformation : MonoBehaviour
         }
             
         position = Player.transform.position;
-        ChunksTotalUI.text = "Chunks Total: "+chunksTotal;
+        ChunksTotalUI.text = "Chunks Total: "
+               +chunksTotal;
         CellsTotalUI.text = "Cells Total: " + cellsTotal;
         CellsVisibleUI.text = "Cells Visible: " + cellsVisible;
         ViewDistanceUI.text = "View Distance: " + viewDistance;
@@ -152,8 +175,6 @@ public class globalInformation : MonoBehaviour
         FPSUI.text = "aproximate FPS: " + fps.ToString("0.00");
         seedUI.text = "Seed: " + seed;
 
-        //Debugging stuff
-        
     }
     IEnumerator calculateFPS()
     {
@@ -191,5 +212,15 @@ public class globalInformation : MonoBehaviour
             }
         }
         Debug.LogWarning("globalInformation.removeChunk(): chunk at: " + input + " not found!");
+    }
+    bool isInView(Vector3 pos)
+    {
+        Vector3 targetDir = pos - groundCursor.position;
+        float angle = Vector3.Angle(targetDir, groundCursor.forward);
+        if (angle < fov)
+        {
+            return true;
+        }
+        return false;
     }
 }

@@ -5,9 +5,8 @@ using System.Linq;
 
 /*  This Script needs to be attached to the main Camera.
 *   It is going to create a Grid of Cells in a certain radius around the Camera
-*   Those Cells are special Plane GameObjects with a size of exactly 2.5 Unit
+*   Those Cells are special Plane GameObjects with a size given by the GlobalInformation Class
 *   The script will make sure that the Cells wont collide but will have a distance of exactly zero to each other
-*
 */
 
 public class GridGenerator : MonoBehaviour
@@ -19,32 +18,47 @@ public class GridGenerator : MonoBehaviour
     private int chunkIterations;
     private float edgelength;
     private Vector3 spawnPosition;
-    //private globalInformation globalInformation;
-    private Vector3 initPos;
-    private bool terrainGiven;
+    private bool terrainGiven = true;
     private bool initialized;
+    private List<Vector3> recentlyGenerated;
+    private List<Vector3> allGenerated;
+    private float chunkSize;
+    private int viewDistance;
+    private int allGeneratedSize;
+    private int density;
+
+    //Debugging
+    private int globalIterations;
+    private int localIterations;
+    //------
 
     public void Initialise()
     {
-        //globalInformation = GameObject.Find("globalInformation").GetComponent<globalInformation>();
-
-            cell = globalInformation.cell;
-            edgelength = globalInformation.edgelength;
-            spawnPosition = new Vector3(transform.position.x, 0, transform.position.z);
-            terrain = globalInformation.Terrain;
-            chunkIterations = globalInformation.chunkIterations;
-            grid = globalInformation.Grid;
-
-            if (terrain)  //If Grid is not Null
-            {
-                Debug.Log("Terrain found, \nfilling Terrain...");
-                fillTerrain(cell, grid, terrain);
-            }
-            else
-            {
-                generateChunk(chunkIterations, edgelength, new Vector3(transform.position.x,0,transform.position.z), grid.transform);
-            }
-            initialized = true;
+        density = globalInformation.density;
+        cell = globalInformation.cell;
+        viewDistance = globalInformation.viewDistance;
+        chunkSize = globalInformation.chunkSize;
+        edgelength = globalInformation.edgelength;
+        spawnPosition = new Vector3(transform.position.x, 0, transform.position.z);
+        terrain = globalInformation.Terrain;
+        chunkIterations = globalInformation.chunkIterations;
+        grid = globalInformation.Grid;
+        recentlyGenerated = new List<Vector3>();
+        allGenerated = new List<Vector3>();
+        generateChunk(globalInformation.position, grid.transform, density);
+        recentlyGenerated.Add(globalInformation.position);
+        allGenerated.Add(globalInformation.position);
+        if (terrain)  //If Grid is not Null
+        {  
+            Debug.Log("Terrain found, \nfilling Terrain...");
+            fillTerrain(cell, grid, terrain);
+        }
+        else
+        {
+            terrainGiven = false;
+            //generateChunk(chunkIterations, edgelength, new Vector3(transform.position.x,0,transform.position.z), grid.transform);
+        }
+        initialized = true;
     }
 
     // Update is called once per frame
@@ -52,13 +66,136 @@ public class GridGenerator : MonoBehaviour
     {
         if (initialized)
         {
-            //For now we assume that a terrain is always given, so the Realtime Generation of a Grid is put on hold for now.
-            if (!terrain)
+            if (!terrainGiven)
             {
-                
+                //Debugging
+                //globalIterations++;
+                //foreach (Vector3 item in allGenerated) {
+                //    Debug.LogWarning(item);
+                //}
+                //----------
+
+                //List<Vector3>[] temp = realTimeGeneration(recentlyGenerated, allGenerated);
+                //recentlyGenerated = temp[0];
+                //allGenerated = temp[1];
             }
         }
-        
+    }
+
+    //Realtime Generation Algorithm
+    //---------------------------
+    //
+    //This algorithm should be first started with a set size of 1. it then loops around the position in a Rhombus
+    //The Top down functionality of this algorithm is sketched out in the following:
+    //
+    //The numbers represent the order of computation
+    //
+    //           5
+    //
+    //      8    1    6
+    //
+    // 20   4    0    2  10
+    //
+    //      16   3   11
+    //
+    //          15
+    //
+    //----------------------
+    List<Vector3>[] realTimeGeneration(List<Vector3> oldGenerated, List<Vector3> allGeneratedLocal) {
+        List<Vector3> newGenerated = new List<Vector3>();
+
+        //Debugging--------
+        localIterations = 0;
+        //-----------------
+
+        //do the following for the outer edges of the Rhombus
+        foreach (Vector3 pos in oldGenerated){
+            localIterations++;
+            Debug.Log("computing chunkLocations for: " + pos);
+
+            //compute possible chunkLocations
+            Vector3 north = new Vector3(pos.x + chunkSize,    0, pos.z              );
+            Vector3 east  = new Vector3(pos.x,                0, pos.z - chunkSize  );
+            Vector3 south = new Vector3(pos.x - chunkSize,    0, pos.z              );
+            Vector3 west  = new Vector3(pos.x,                0, pos.z + chunkSize  );
+            
+            newGenerated.Add(north);
+            newGenerated.Add(east);
+            newGenerated.Add(south);
+            newGenerated.Add(west);
+
+            //Debugging--------
+            Debug.Log(north + " was added because its north of " + pos);
+            Debug.Log(east + " was added because its east of " + pos);
+            Debug.Log(south + " was added because its south of " + pos);
+            Debug.Log(west + " was added because its west of " + pos);
+
+            foreach (Vector3 item in newGenerated)
+            {
+                Debug.Log(item + " is in newGenerated by iteration: " + globalIterations + "." + localIterations);
+            }
+            Debug.LogWarning("The following list is for iteration: "+ globalIterations + "." + localIterations);
+            foreach (Vector3 item in allGeneratedLocal) {
+                Debug.Log(item + " is in allGenerated");
+            }
+            Debug.LogWarning("Listing is finished");
+            //-----------------
+
+            foreach (Vector3 item in allGeneratedLocal) {
+                if (north == item || Vector3.Distance(globalInformation.position, north) > viewDistance) {
+                    north = Vector3.one;
+                }
+                if (east == item || Vector3.Distance(globalInformation.position, east) > viewDistance)
+                {
+                    west = Vector3.one;
+                }
+                if (south == item || Vector3.Distance(globalInformation.position, south) > viewDistance)
+                {
+                    south = Vector3.one;
+                }
+                if (west == item || Vector3.Distance(globalInformation.position, west) > viewDistance)
+                {
+                    west = Vector3.one;
+                }
+            }
+
+            if (north != Vector3.one) {
+                allGeneratedLocal.Add(north);
+                allGeneratedSize++;
+                generateChunk(north, grid.transform, density);
+            }
+            if (east != Vector3.one)
+            {
+                allGeneratedLocal.Add(east);
+                generateChunk(east, grid.transform, density);
+                allGeneratedSize++;
+            }
+            if (south != Vector3.one)
+            {
+                allGeneratedLocal.Add(south);
+                generateChunk(south, grid.transform, density);
+                allGeneratedSize++;
+            }
+            if (west != Vector3.one)
+            {
+                
+                allGeneratedLocal.Add(west);
+                generateChunk(west, grid.transform, density);
+                allGeneratedSize++;
+            }
+            //Debugging--------------
+            if (allGeneratedSize >= 10) {
+                Debug.Break();
+            }
+            //-----------------------
+            globalInformation.chunksTotal = allGeneratedSize;
+        }
+
+        List<Vector3>[] returnValues = new List<Vector3>[2];
+        returnValues[0] = newGenerated;
+        returnValues[1] = allGeneratedLocal;
+
+        return returnValues;
     }
 
     void fillTerrain(GameObject cell, GameObject grid, GameObject terrain)
@@ -70,15 +207,15 @@ public class GridGenerator : MonoBehaviour
         Vector3 pos = new Vector3(terrain.transform.position.x- globalInformation.terrainSize.x/2, 0, terrain.transform.position.z- globalInformation.terrainSize.y / 2);
         Debug.Log("corner of Grid: " + pos);
 
-        for(float i = 0; i < globalInformation.terrainSize.x; i= i + edgelength * chunkIterations)
+        for(float i = 0; i < globalInformation.terrainSize.x; i= i + globalInformation.chunkSize)
         {
-            for (float j = 0; j < globalInformation.terrainSize.y; j = j + edgelength * chunkIterations)
+            for (float j = 0; j < globalInformation.terrainSize.y; j = j + globalInformation.chunkSize)
             {
-                //Debug.Log("Generating Chunk at: " + pos);
-                generateChunk(chunkIterations, edgelength, pos, grid.transform);
+                Debug.Log("Generating Chunk at: " + pos);
+                generateChunk(pos, grid.transform, globalInformation.density);
                 pos = new Vector3(pos.x+(edgelength * chunkIterations), 0, pos.z);
             }
-            pos = new Vector3((terrain.transform.position.x - globalInformation.terrainSize.x / 2), 0, pos.z + (edgelength * chunkIterations));
+            pos = new Vector3((terrain.transform.position.x - globalInformation.terrainSize.x / 2), 0, pos.z + (globalInformation.chunkSize));
         }
         //grid.transform.parent = terrain.transform;
     }
@@ -86,19 +223,11 @@ public class GridGenerator : MonoBehaviour
     /*
      * This Function fills a chunk of given size
      * going from bottom left to top right
-     * 
      */
-    public Vector3 generateChunk(int iterations, float step, Vector3 pos, Transform parent)
-    {
-        //Debugging input variables
-        //Debug.Log("size: " + size);
-        //Debug.Log("step: " + step);
-        //Debug.Log("obj: " + cell.name);
-        //Debug.Log("pos old: " + pos);
 
-        
-        pos = new Vector3(pos.x+edgelength/2,0,pos.z+edgelength/2);
-        //Debug.Log("pos new: " + pos);
+    public void generateChunk(Vector3 pos, Transform parent, int density)
+    {
+        float range = chunkSize;
 
         GameObject spawned;
         GameObject chunk = new GameObject();
@@ -106,23 +235,15 @@ public class GridGenerator : MonoBehaviour
         chunk.name = "chunk" + pos;
         globalInformation.chunksTotal++;
 
-        for (int i = 0; i<iterations; i++)
-        {
-            for (int j = 0; j < iterations; j++)
-            {
-                spawned = Instantiate(cell, pos, Quaternion.identity);   //Instantiating cell, at given position with Grid as parent
-                spawned.name = (cell.name + pos);
-                spawned.transform.parent = chunk.transform;
-                globalInformation.cellsTotal++;
-                pos = new Vector3(pos.x + step, 0, pos.z);  //step left
-                
-            }
-            pos = new Vector3(pos.x-(iterations*step), 0, pos.z+step);    //return to zero and step up
+        for (int i = 0; i < density; i++) {
+            Vector3 spawnPos = new Vector3(Random.Range(pos.x, pos.x + range), 0, Random.Range(pos.z, pos.z + range));
+            spawned = Instantiate(cell, spawnPos, Quaternion.identity);
+            spawned.name = (cell.name + spawnPos);
+            spawned.transform.parent = chunk.transform;
+            globalInformation.cellsTotal++;
         }
-        chunk.transform.parent = parent;
-        return pos;
     }
-    
+
     GameObject getGridCell(GameObject obj)
     {
         Debug.Log(obj.name);
