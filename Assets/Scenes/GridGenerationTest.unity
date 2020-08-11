@@ -1138,7 +1138,7 @@ MonoBehaviour:
   setRotationSpeed: 200
   Player: {fileID: 1248118897}
   CanvasUI: {fileID: 1123343753}
-  SetSeed: null
+  SetSeed: Penis
   SetgroundCursor: {fileID: 1068686174}
   setMaxBuildingHeigth: 50
   setMaxBuildingWidth: 15

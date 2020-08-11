@@ -14,12 +14,12 @@ public class PlayerMovement : MonoBehaviour
 
         public void Initialise()
         {
-            groundCursor = globalInformation.groundCursor;
+            groundCursor = giAlternative.groundCursor;
             camTransform = Camera.main.transform;
             myCC = GetComponent<CharacterController>();
             initialized = true;
-            movementSpeed = globalInformation.MovementSpeed;
-            rotationSpeed = globalInformation.RotationSpeed;
+            movementSpeed = giAlternative.MovementSpeed;
+            rotationSpeed = giAlternative.RotationSpeed;
             if (!groundCursor)
             {
                 groundCursor = Instantiate(new GameObject(), new Vector3(transform.position.x, 0, transform.position.y), Quaternion.identity, transform).transform;

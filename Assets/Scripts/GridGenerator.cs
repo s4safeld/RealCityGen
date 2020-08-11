@@ -228,7 +228,6 @@ public class GridGenerator : MonoBehaviour
     public void generateChunk(Vector3 pos, Transform parent, int density)
     {
         float range = chunkSize;
-
         GameObject spawned;
         GameObject chunk = new GameObject();
         chunk.transform.position = pos;
@@ -236,12 +235,25 @@ public class GridGenerator : MonoBehaviour
         globalInformation.chunksTotal++;
 
         for (int i = 0; i < density; i++) {
-            Vector3 spawnPos = new Vector3(Random.Range(pos.x, pos.x + range), 0, Random.Range(pos.z, pos.z + range));
+            float xPos = Random.Range(0, range);
+            float zPos = Random.Range(0, range);
+            Vector3 spawnPos = new Vector3(pos.x + xPos, 0, pos.z + zPos);
             spawned = Instantiate(cell, spawnPos, Quaternion.identity);
-            spawned.name = (cell.name + spawnPos);
             spawned.transform.parent = chunk.transform;
+            spawned.name = (cell.name + spawnPos);
             globalInformation.cellsTotal++;
         }
+    }
+
+    int hash(int key)
+    {
+        key += ~(key << 15);
+        key ^= (key >> 10);
+        key += (key << 3);
+        key ^= (key >> 6);
+        key += ~(key << 11);
+        key ^= (key >> 16);
+        return key;
     }
 
     GameObject getGridCell(GameObject obj)

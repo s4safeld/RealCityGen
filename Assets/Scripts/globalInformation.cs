@@ -77,7 +77,7 @@ public class globalInformation : MonoBehaviour
     //Debugging
     public static bool chunksFull = false;
 
-    private void Start()
+    private void Awake()
     {
         //set all statics
         viewDistance = setViewDistance;
@@ -120,6 +120,7 @@ public class globalInformation : MonoBehaviour
         {
             seed = UnityEngine.Random.Range(0, 10000000).GetHashCode();
         }
+        UnityEngine.Random.InitState(seed);
 
 
         //Call Initialize Functions for all scripts that need globalInformationValues

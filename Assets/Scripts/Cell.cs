@@ -38,29 +38,12 @@ public class Cell : MonoBehaviour
         groundCursor = globalInformation.groundCursor.transform;
         viewDistance = globalInformation.viewDistance;
         edgelength = globalInformation.edgelength;
-        localSeed = hash((int)transform.position.x ^ hash((int)transform.position.z ^ globalInformation.seed));
         
 
         //temporary
-        height = localSeed;
-        width = localSeed;
-        length = localSeed;
-        float widthRange = Random.Range(globalInformation.minBuildingWidth, globalInformation.maxBuildingWidth);
-        float heightRange = Random.Range(globalInformation.minBuildingHeigth, globalInformation.maxBuildingHeigth);
-        float lengthRange = Random.Range(globalInformation.minBuildingLength, globalInformation.maxBuildingLength);
-
-        while (width > widthRange)
-        {
-            width = width / Random.Range(1,3);
-        }
-        while (height > heightRange)
-        {
-            height = height / Random.Range(1, 3);
-        }
-        while (length > lengthRange)
-        {
-            length = length / Random.Range(1, 3);
-        }
+        width = Random.Range(globalInformation.minBuildingWidth,  globalInformation.maxBuildingWidth );
+        height  = Random.Range(globalInformation.minBuildingHeigth, globalInformation.maxBuildingHeigth);
+        length = Random.Range(globalInformation.minBuildingLength, globalInformation.maxBuildingLength);
         //----------
     }
     public void Update()
