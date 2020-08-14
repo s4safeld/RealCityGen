@@ -20,16 +20,23 @@ public class Cell : MonoBehaviour
     private float width;
     private float length;
     private TextMeshPro tmp;
+    private GridGenerator gridGenerator;
     public Vector2 posInArray;
 
     private bool generated = false;
     private bool generationAllowed = true;
     private bool initialized = false;
     private bool disabled = false;
+    private bool initialised = false;
 
     private float distance;
 
     private void Start()
+    {
+
+    }
+
+    public void Initialise(GridGenerator parent)
     {
         generationAllowed = true;   //Temporary
         cellCollider = globalInformation.cellCollider;
@@ -37,17 +44,21 @@ public class Cell : MonoBehaviour
         camTransform = mainCam.gameObject.transform;
         groundCursor = globalInformation.groundCursor.transform;
         viewDistance = globalInformation.viewDistance;
-        edgelength = globalInformation.edgelength;
-        
+        gridGenerator = parent;
+
 
         //temporary
-        width = Random.Range(globalInformation.minBuildingWidth,  globalInformation.maxBuildingWidth );
-        height  = Random.Range(globalInformation.minBuildingHeigth, globalInformation.maxBuildingHeigth);
-        length = Random.Range(globalInformation.minBuildingLength, globalInformation.maxBuildingLength);
+        width = Random.Range(gridGenerator.minBuildingWidth, gridGenerator.maxBuildingWidth);
+        height = Random.Range(gridGenerator.minBuildingHeigth, gridGenerator.maxBuildingHeigth);
+        length = Random.Range(gridGenerator.minBuildingLength, gridGenerator.maxBuildingLength);
         //----------
+
+        initialised = true;
     }
     public void Update()
     {
+        if (initialised)
+        {
             distance = Vector3.Distance(groundCursor.position, transform.position);
             if (distance < viewDistance)
             {
@@ -80,6 +91,7 @@ public class Cell : MonoBehaviour
             {
                 unGenerate();
             }
+        }
     }
 
     void Generate()
@@ -97,11 +109,11 @@ public class Cell : MonoBehaviour
                 Debug.Log(name + " is generating cube");
                 generated = true;
                 //temporary--------
-                spawnedBlock = Instantiate(spawnBlock,transform.position, Quaternion.identity , transform);
+                spawnedBlock = Instantiate(spawnBlock, transform.position, Quaternion.identity, transform);
                 tmp = spawnedBlock.transform.GetChild(0).GetComponent<TextMeshPro>();
                 tmp.transform.SetParent(transform);
-                spawnedBlock.transform.localScale = new Vector3(width,height,length);
-                spawnedBlock.transform.position += new Vector3(0, getHeight(spawnedBlock)/2, 0);
+                spawnedBlock.transform.localScale = new Vector3(width, height, length);
+                spawnedBlock.transform.position += new Vector3(0, getHeight(spawnedBlock) / 2, 0);
                 tmp.transform.position = tmp.transform.position + new Vector3(0, 4, -5);
                 tmp.transform.SetParent(spawnedBlock.transform);
                 tmp.text = localSeed + "\n" + width + "\n" + height + "\n" + length;
@@ -121,14 +133,17 @@ public class Cell : MonoBehaviour
 
     bool isInView()
     {
-        Vector3 targetDir = transform.position - groundCursor.position;
-        float angle = Vector3.Angle(targetDir, groundCursor.forward);
-        if (angle < (mainCam.fieldOfView))
-        {
-            //Debug.Log(name + ": is in View");
-            return true;
+        if (Vector3.Distance(groundCursor.position, transform.position) > 50) {
+            Vector3 targetDir = transform.position - groundCursor.position;
+            float angle = Vector3.Angle(targetDir, groundCursor.forward);
+            if (angle < (mainCam.fieldOfView))
+            {
+                //Debug.Log(name + ": is in View");
+                return true;
+            }
+            return false;
         }
-        return false;
+        return true;
     }
     IEnumerator DisableScript()
     {

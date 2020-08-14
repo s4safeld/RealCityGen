@@ -64,15 +64,12 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Building.cs" />
     <Compile Include="Assets\Scripts\Cell.cs" />
-    <Compile Include="Assets\Scripts\CellAlternative.cs" />
     <Compile Include="Assets\Scripts\CellCollider.cs" />
     <Compile Include="Assets\Scripts\CreateMeshCollider.cs" />
     <Compile Include="Assets\Scripts\DrawFrustumCorners.cs" />
     <Compile Include="Assets\Scripts\GridGenerator.cs" />
-    <Compile Include="Assets\Scripts\GridGeneratorAlternative.cs" />
     <Compile Include="Assets\Scripts\PlayerMovement.cs" />
     <Compile Include="Assets\Scripts\generateBuilding.cs" />
-    <Compile Include="Assets\Scripts\giAlternative.cs" />
     <Compile Include="Assets\Scripts\globalInformation.cs" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro.cginc" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile Overlay.shader" />
