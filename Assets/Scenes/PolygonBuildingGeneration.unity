@@ -248,6 +248,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: e0a0a74136bddee41b2990524aff3014, type: 2}
+  edges: 0
+  shapeMesh: {x: 2, y: 3, z: 1}
 --- !u!1 &2042330733
 GameObject:
   m_ObjectHideFlags: 0

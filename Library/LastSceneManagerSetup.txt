@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/GridGenerationTest.unity
+- path: Assets/Scenes/PolygonBuildingGeneration.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0
