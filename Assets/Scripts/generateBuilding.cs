@@ -12,7 +12,6 @@ public class generateBuilding : MonoBehaviour
     Vector2[] newUV;
     int[] newTriangles;
     public Material material;
-    public int edges;
     public Vector3 shapeMesh;
     public int seed;
     public int minCount;
@@ -20,30 +19,12 @@ public class generateBuilding : MonoBehaviour
     public float minRange;
     public float maxRange;
 
+    [SerializeField]
+    public buildingStep[] steps;
+
     // Start is called before the first frame update
     void Start()
     {
-        /*float angle;
-        float oldAngle = 0;
-
-
-        Vector2 bounds = new Vector2(10,10);
-
-        Vector3 startPos = new Vector3(Random.Range(0, bounds.x), 0, Random.Range(0, bounds.y));
-        float distance = Random.Range(startPos.x, bounds.y);
-
-        Vector3[] vertices = new Vector3[edges];
-        int[] triangles = new int[edges*edges*edges];
-
-        vertices[0] = new Vector3(startPos.x + distance, startPos.y, startPos.z);
-        angle = Random.Range(90, 180);
-        vertices[1] = vertices[0] * (angle + oldAngle);
-        
-        check this later:
-        http://wiki.unity3d.com/index.php?title=Triangulator&_ga=2.97540694.871866967.1597588282-744620994.1584369047
-         */
-
-
         //Temporary
         if (seed == 0) {
             seed = Random.Range(-100000, 100000);
@@ -52,59 +33,51 @@ public class generateBuilding : MonoBehaviour
         Debug.Log("seed: "+seed);
         //--------
 
-        Mesh randMesh = randomMesh(minCount,maxCount,minRange,maxRange);
-        //Mesh mesh = compute2DMesh();
-        //Mesh mesh3 = extrudeMesh(mesh, shapeMesh);
-        
+        Mesh randMesh = randomMesh(maxCount,minRange,maxRange);
+        randMesh = extrudeMesh(randMesh, new Vector3(0,-1,0));
+        //Mesh building = generate();
 
-        //GameObject gameObject = new GameObject("Mesh", typeof(MeshFilter), typeof(MeshRenderer));
-        //gameObject.GetComponent<MeshFilter>().mesh = mesh;
+        GameObject gameObject = new GameObject("randomMesh", typeof(MeshFilter), typeof(MeshRenderer));
+        gameObject.GetComponent<MeshFilter>().mesh = randMesh;
 
-        //GameObject gameObject3 = new GameObject("Mesh3", typeof(MeshFilter), typeof(MeshRenderer));
-        //gameObject3.GetComponent<MeshFilter>().mesh = mesh3;
+        Mesh[] mshs = generate(steps, 8, 10, 10, 10);
+        foreach (Mesh mesh in mshs) {
+            gameObject = new GameObject("mesh", typeof(MeshFilter), typeof(MeshRenderer));
+            gameObject.GetComponent<MeshFilter>().mesh = mesh;
+        }
 
-        GameObject gameObject4 = new GameObject("randomMesh", typeof(MeshFilter), typeof(MeshRenderer));
-        gameObject4.GetComponent<MeshFilter>().mesh = randMesh;
+        GameObject gameObject2 = new GameObject("building", typeof(MeshFilter), typeof(MeshRenderer));
 
-
-        GameObject gameObject5 = new GameObject("randomMesh2", typeof(MeshFilter), typeof(MeshRenderer));
-        gameObject5.GetComponent<MeshFilter>().mesh = randMesh;
-
-
-
-        Vector3 pos;
-
-        float x = 0;
-
-        /*GameObject temp;
-        temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        temp.name = "Pi";
-        temp.transform.position = new Vector3(Mathf.Sin(3.141f), 0, -1);
-
-        temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        temp.name = "Cos";
-        temp.transform.position = new Vector3(Mathf.Cos(3.141f), 0, -2);
-        for (float i = 0; i < 3.141f*2; i = i + 0.1f) {
-            temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            temp.name = "Sphere" + i;
-            temp.transform.position = new Vector3(Mathf.Sin(i),0,Mathf.Cos(i));
-        }*/
     }
 
     private void Update()
     {
         Debug.DrawLine(new Vector3(0, -10, 0), new Vector3(0, 10, 0), Color.red);
     }
-    Mesh randomMesh(int minCount, int maxCount, float minRange, float maxRange) {
+    bool containsPoint(Vector2[] polyPoints, Vector2 p)
+    {
+        var j = polyPoints.Length - 1;
+        var inside = false;
+        for (int i = 0; i < polyPoints.Length; j = i++)
+        {
+            var pi = polyPoints[i];
+            var pj = polyPoints[j];
+            if (((pi.y <= p.y && p.y < pj.y) || (pj.y <= p.y && p.y < pi.y)) &&
+                (p.x < (pj.x - pi.x) * (p.y - pi.y) / (pj.y - pi.y) + pi.x))
+                inside = !inside;
+        }
+        return inside;
+    }
+    Mesh randomMesh(int vertCount, float minRange, float maxRange) {
 
-        maxCount = Mathf.RoundToInt(Random.Range(minCount, maxCount));
 
-        Vector2[] vertices2D = new Vector2[maxCount];
+        Vector2[] vertices2D = new Vector2[vertCount];
 
-        float stepSize = 8 / (float)maxCount;
+        float stepSize = 8 / (float)vertCount;
 
+        //Loops around a central point using Sin and Cos functions to generate random vertices in clockwise order
         float steps = 0;
-        for (int i = 0; i < maxCount; i++) {
+        for (int i = 0; i < vertCount; i++) {
             float x = Mathf.Sin(Random.Range(steps, steps + stepSize));
             float z = Mathf.Cos(Random.Range(steps, steps + stepSize));
             vertices2D[i] = new Vector2(x, z);
@@ -113,17 +86,19 @@ public class generateBuilding : MonoBehaviour
             Debug.Log("Steps: " + steps);
         }
 
+        //computes surface triangles for 2D Mesh
         Triangulator tr = new Triangulator(vertices2D);
         int[] indices = tr.Triangulate();
 
-
-        Vector3[] vertices = new Vector3[maxCount];
+        //casts 2D triangles to 3D
+        Vector3[] vertices = new Vector3[vertCount];
         for (int i = 0; i < vertices.Length; i++)
         {
             vertices[i] = new Vector3(vertices2D[i].x, 0, vertices2D[i].y);
             Debug.Log("vertices[" + i + "]: " + vertices[i]);
         }
 
+        //computes UVs
         Vector2[] uvs = new Vector2[vertices.Length];
         for (int i = 0; i < uvs.Length; i++) {
             uvs[i] = new Vector2(vertices[i].x, vertices[i].z);
@@ -137,42 +112,8 @@ public class generateBuilding : MonoBehaviour
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
 
-
         return mesh;
     }
-
-
-    Mesh compute2DMesh() {
-        Vector3[] vertices = new Vector3[5];
-        int[] triangles = new int[9];
-
-        vertices[0] = new Vector3(0, 0, 0);
-        vertices[1] = new Vector3(0, 0, 1);
-        vertices[2] = new Vector3(0.5f, 0, 1.5f);
-        vertices[3] = new Vector3(1, 0, 1);
-        vertices[4] = new Vector3(1, 0, 0);
-
-        triangles[0] = 0;
-        triangles[1] = 1;
-        triangles[2] = 3;
-
-        triangles[3] = 0;
-        triangles[4] = 3;
-        triangles[5] = 4;
-
-        triangles[6] = 1;
-        triangles[7] = 2;
-        triangles[8] = 3;
-
-
-        Mesh mesh = new Mesh();
-
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-
-        return mesh;
-    }
-
     Mesh extrudeMesh(Mesh mesh, Vector3 location) {
 
         int i;
@@ -211,7 +152,7 @@ public class generateBuilding : MonoBehaviour
         {
             triangles[pos] = mesh.triangles[pos++];
         }
-        //
+
         while (pos < oldTrianglesLength*2)  //generate Triangles of the copied vertices
         {
             triangles[pos] = mesh.triangles[pos - mesh.triangles.Length] + vertices.Length/2;
@@ -220,7 +161,8 @@ public class generateBuilding : MonoBehaviour
         //-----------------
 
         //connect the two meshes
-        /*This algorithm connects two meshes in the following way:
+            //Explanation and Example:
+            {/*This algorithm connects two meshes in the following way:
 
         The algorithm first loops around the vertices of the bottom mesh clockwise and generates one triangle each time connecting it to the top Mesh
         it then loops around the bottom vertices a second time generating another triangle thus finishing the squares to connect the meshes.
@@ -245,6 +187,8 @@ public class generateBuilding : MonoBehaviour
         
         8       7   0   3
         */
+        }
+            //---------------------
         i = vertices.Length/2;
         j = vertices.Length/2 + 1;
         k = 1;
@@ -275,17 +219,82 @@ public class generateBuilding : MonoBehaviour
         triangles[pos++] = 0;
         triangles[pos] = k;
 
-        //Mesh newMesh = new Mesh();
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        if (location.y > 0) {
+        //Reverse Triangles to not be rendered upside down
+        if (location.y > 0)
+        {
             mesh.triangles = mesh.triangles.Reverse().ToArray();
         }
+
+
+        //compute UVs
+        Vector2[] uvs = new Vector2[vertices.Length];
+        while (i < uvs.Length)
+        {
+            uvs[i] = new Vector2(vertices[i].x, vertices[i].z);
+            i++;
+        }
+
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
+        mesh.uv = uvs;
+
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+        
         return mesh;
+    }
+    Mesh[] generate(buildingStep[] steps, float minWidth, float maxWidth, float minLength, float maxLength) {
+        int totalFloors = 0;
+        int totalSteps = steps.Length;
+        int floorsGenerated = 0;
+        Mesh[] meshes = new Mesh[steps.Length];
+        for (int i = 0; i < steps.Length; i++){
+            totalFloors += steps[i].floors;
+        }
+        for (int i = 0; i < steps.Length; i++) {
+            if (steps[i].optional && Random.value >= 0.5f) {
+                steps[i].generate = false;
+                totalSteps--;
+            }
+            if (steps[i].generate && i == 0)
+            {
+                meshes[i] = randomMesh(steps[i].vertices, minWidth, Random.Range(minWidth, ((maxWidth / totalSteps) * (i + 1))));
+                meshes[i] = extrudeMesh(meshes[i], new Vector3(0,-(floorsGenerated + steps[i].floors)*2,0));
+            }
+            else {
+                if (steps[i].generate) {
+                    meshes[i] = randomMesh(steps[i].vertices, (maxWidth / totalSteps) * i, Random.Range(minWidth, ((maxWidth / totalSteps) * (i + 1))));
+                    meshes[i] = extrudeMesh(meshes[i], new Vector3(0, -(floorsGenerated + steps[i].floors) * 2, 0));
+                }
+            }
+            for (int j = 0; j < meshes[i].vertices.Length; j++) {
+                meshes[i].vertices[j] = new Vector3(meshes[i].vertices[j].x, -floorsGenerated*2, meshes[i].vertices[j].z);
+            }
+        }
+
+        return meshes;
     }
 
 }
 
+[Serializable]
+public class buildingStep{
+    public bool optional;
+    public bool generate = true;
+    public int floors;
+    public int vertices;
+
+    public buildingStep(int minFloors, int maxFloors, int minVertices, int maxVertices, bool optional) {
+        floors = Random.Range(minFloors, maxFloors);
+        vertices = Random.Range(minVertices, maxVertices);
+        optional = this.optional;
+    }
+}
+
+//This class makes it possible to automatically create surface triangles for any sets of 2D vertices
+//It is not written by me, but from runevision
+//The source can be found here:
+//http://wiki.unity3d.com/index.php?title=Triangulator&_ga=2.97540694.871866967.1597588282-744620994.1584369047
 public class Triangulator
 {
     private List<Vector2> m_points = new List<Vector2>();
