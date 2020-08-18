@@ -254,19 +254,20 @@ MonoBehaviour:
   maxCount: 8
   minRange: 2
   maxRange: 4
+  mat: {fileID: 2100000, guid: 2814efe89a8138546b4ea099e9845bac, type: 2}
   steps:
-  - optional: 0
-    generate: 1
-    floors: 2
-    vertices: 5
   - optional: 0
     generate: 1
     floors: 2
     vertices: 4
   - optional: 0
     generate: 1
-    floors: 2
-    vertices: 3
+    floors: 3
+    vertices: 4
+  - optional: 0
+    generate: 1
+    floors: 5
+    vertices: 4
 --- !u!1 &2042330733
 GameObject:
   m_ObjectHideFlags: 0

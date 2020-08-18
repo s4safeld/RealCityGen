@@ -11,49 +11,37 @@ public class generateBuilding : MonoBehaviour
     Vector3[] newVertices;
     Vector2[] newUV;
     int[] newTriangles;
-    public Material material;
     public Vector3 shapeMesh;
-    public int seed;
-    public int minCount;
-    public int maxCount;
-    public float minRange;
-    public float maxRange;
+    public int minWidth;
+    public int maxWidth;
+    public float minLength;
+    public float maxLength;
+    public Material material;
 
     [SerializeField]
     public buildingStep[] steps;
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        //Temporary
-        if (seed == 0) {
-            seed = Random.Range(-100000, 100000);
-        }
-        Random.InitState(seed);
-        Debug.Log("seed: "+seed);
-        //--------
-
-        Mesh randMesh = randomMesh(maxCount,minRange,maxRange);
-        randMesh = extrudeMesh(randMesh, new Vector3(0,-1,0));
-        //Mesh building = generate();
-
-        GameObject gameObject = new GameObject("randomMesh", typeof(MeshFilter), typeof(MeshRenderer));
-        gameObject.GetComponent<MeshFilter>().mesh = randMesh;
-
-        Mesh[] mshs = generate(steps, 8, 10, 10, 10);
-        foreach (Mesh mesh in mshs) {
-            gameObject = new GameObject("mesh", typeof(MeshFilter), typeof(MeshRenderer));
-            gameObject.GetComponent<MeshFilter>().mesh = mesh;
-        }
-
-        GameObject gameObject2 = new GameObject("building", typeof(MeshFilter), typeof(MeshRenderer));
-
+        
     }
 
-    private void Update()
+    public GameObject fire(Vector3 position)
     {
-        Debug.DrawLine(new Vector3(0, -10, 0), new Vector3(0, 10, 0), Color.red);
+        foreach (buildingStep step in steps)
+        {
+            step.initialise();
+        }
+        GameObject[] floors = generate(steps, minWidth, maxWidth, minLength, maxLength);
+        GameObject building = new GameObject("building", typeof(MeshFilter), typeof(MeshRenderer));
+
+        CombMeshes(floors,building);
+        building.transform.position = position;
+        building.GetComponent<Renderer>().material = material;
+        return building;
     }
+
     bool containsPoint(Vector2[] polyPoints, Vector2 p)
     {
         var j = polyPoints.Length - 1;
@@ -83,7 +71,6 @@ public class generateBuilding : MonoBehaviour
             vertices2D[i] = new Vector2(x, z);
             vertices2D[i] *= Random.Range(minRange, maxRange);
             steps += stepSize;
-            Debug.Log("Steps: " + steps);
         }
 
         //computes surface triangles for 2D Mesh
@@ -95,7 +82,6 @@ public class generateBuilding : MonoBehaviour
         for (int i = 0; i < vertices.Length; i++)
         {
             vertices[i] = new Vector3(vertices2D[i].x, 0, vertices2D[i].y);
-            Debug.Log("vertices[" + i + "]: " + vertices[i]);
         }
 
         //computes UVs
@@ -243,13 +229,14 @@ public class generateBuilding : MonoBehaviour
         
         return mesh;
     }
-    Mesh[] generate(buildingStep[] steps, float minWidth, float maxWidth, float minLength, float maxLength) {
+    GameObject[] generate(buildingStep[] steps, float minWidth, float maxWidth, float minLength, float maxLength) {
         int totalFloors = 0;
         int totalSteps = steps.Length;
         int floorsGenerated = 0;
+        GameObject[] floors = new GameObject[steps.Length];
         Mesh[] meshes = new Mesh[steps.Length];
         for (int i = 0; i < steps.Length; i++){
-            totalFloors += steps[i].floors;
+            totalFloors += steps[i].getFloors();
         }
         for (int i = 0; i < steps.Length; i++) {
             if (steps[i].optional && Random.value >= 0.5f) {
@@ -258,36 +245,83 @@ public class generateBuilding : MonoBehaviour
             }
             if (steps[i].generate && i == 0)
             {
-                meshes[i] = randomMesh(steps[i].vertices, minWidth, Random.Range(minWidth, ((maxWidth / totalSteps) * (i + 1))));
-                meshes[i] = extrudeMesh(meshes[i], new Vector3(0,-(floorsGenerated + steps[i].floors)*2,0));
+                meshes[i] = randomMesh(steps[i].getVertices(), minWidth, Random.Range(minWidth, ((maxWidth / totalSteps) * (i + 1))));
+                meshes[i] = extrudeMesh(meshes[i], new Vector3(0,-(totalFloors-floorsGenerated)*2,0));
             }
             else {
                 if (steps[i].generate) {
-                    meshes[i] = randomMesh(steps[i].vertices, (maxWidth / totalSteps) * i, Random.Range(minWidth, ((maxWidth / totalSteps) * (i + 1))));
-                    meshes[i] = extrudeMesh(meshes[i], new Vector3(0, -(floorsGenerated + steps[i].floors) * 2, 0));
+                    meshes[i] = randomMesh(steps[i].getVertices(), (maxWidth / totalSteps) * i, Random.Range(minWidth, ((maxWidth / totalSteps) * (i + 1))));
+                    meshes[i] = extrudeMesh(meshes[i], new Vector3(0, -(totalFloors - floorsGenerated) * 2, 0));
                 }
             }
-            for (int j = 0; j < meshes[i].vertices.Length; j++) {
-                meshes[i].vertices[j] = new Vector3(meshes[i].vertices[j].x, -floorsGenerated*2, meshes[i].vertices[j].z);
+            if (steps[i].generate)
+            {
+                meshes[i] = moveMesh(meshes[i], new Vector3(0, (totalFloors - floorsGenerated) * 2, 0));//.vertices[j] = new Vector3(meshes[i].vertices[j].x, -floorsGenerated*2, meshes[i].vertices[j].z);
+                floors[i] = new GameObject("mesh", typeof(MeshFilter), typeof(MeshRenderer));
+                floors[i].GetComponent<MeshFilter>().mesh = meshes[i];
+                floorsGenerated += steps[i].getFloors();
+            }
+            else
+            {
+                floors[i] = new GameObject("mesh", typeof(MeshFilter), typeof(MeshRenderer));
+                floors[i].GetComponent<MeshFilter>().mesh = new Mesh();
             }
         }
 
-        return meshes;
+        return floors;
     }
+    Mesh moveMesh(Mesh mesh, Vector3 location) {
 
+        Vector3[] vertices = new Vector3[mesh.vertices.Length];
+
+        for (int i = 0; i < vertices.Length; i++) {
+            vertices[i] = new Vector3(mesh.vertices[i].x + location.x, mesh.vertices[i].y + location.y, mesh.vertices[i].z + location.z);
+            Debug.Log("vertices[" + i + "]: " + vertices[i]);
+        }
+
+        mesh.vertices = vertices;
+        return mesh;
+    }
+    void CombMeshes(GameObject[] floors, GameObject building) {
+        MeshFilter[] meshFilters = new MeshFilter[floors.Length];
+        CombineInstance[] combine = new CombineInstance[meshFilters.Length];
+        for (int i = 0; i < floors.Length; i++)
+        {
+            meshFilters[i] = floors[i].GetComponent<MeshFilter>();       
+        }
+        Debug.Log(meshFilters.Length);
+        for (int i = 0;  i < meshFilters.Length; i++)
+        {
+            combine[i].mesh = meshFilters[i].sharedMesh;
+            combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
+            Destroy(meshFilters[i].gameObject);
+        }
+        building.GetComponent<MeshFilter>().mesh = new Mesh();
+        building.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
+    }
 }
 
 [Serializable]
 public class buildingStep{
     public bool optional;
     public bool generate = true;
-    public int floors;
-    public int vertices;
+    public int minFloors;
+    public int maxFloors;
+    public int minVertices;
+    public int maxVertices;
+    private int vertices;
+    private int floors;
 
-    public buildingStep(int minFloors, int maxFloors, int minVertices, int maxVertices, bool optional) {
+    public int getVertices() {
+        return vertices;
+    }
+    public int getFloors() {
+        return floors;
+    }
+
+    public void initialise() {
         floors = Random.Range(minFloors, maxFloors);
         vertices = Random.Range(minVertices, maxVertices);
-        optional = this.optional;
     }
 }
 

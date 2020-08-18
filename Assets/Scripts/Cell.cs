@@ -22,6 +22,8 @@ public class Cell : MonoBehaviour
     private TextMeshPro tmp;
     private GridGenerator gridGenerator;
     public Vector2 posInArray;
+    public generateBuilding buildingGenerator;
+    public GameObject building;
 
     private bool generated = false;
     private bool generationAllowed = true;
@@ -108,7 +110,7 @@ public class Cell : MonoBehaviour
             {
                 Debug.Log(name + " is generating cube");
                 generated = true;
-                //temporary--------
+                /*/temporary--------
                 spawnedBlock = Instantiate(spawnBlock, transform.position, Quaternion.identity, transform);
                 tmp = spawnedBlock.transform.GetChild(0).GetComponent<TextMeshPro>();
                 tmp.transform.SetParent(transform);
@@ -117,7 +119,9 @@ public class Cell : MonoBehaviour
                 tmp.transform.position = tmp.transform.position + new Vector3(0, 4, -5);
                 tmp.transform.SetParent(spawnedBlock.transform);
                 tmp.text = localSeed + "\n" + width + "\n" + height + "\n" + length;
-                //-------------------
+                //-------------------*/
+                building = buildingGenerator.fire(transform.position);
+                building.transform.parent = gameObject.transform;
             }
         }
     }
@@ -125,7 +129,7 @@ public class Cell : MonoBehaviour
     {
         if (generated)
         {
-            Destroy(spawnedBlock);
+            Destroy(building);
         }
         StartCoroutine(DisableScript());
         generated = false;

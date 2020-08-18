@@ -45,7 +45,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnBlock: {fileID: 1856665461701599627, guid: 4f95b9042689d00468097774d07e943c,
     type: 3}
-  spawnedBlock: {fileID: 0}
-  mainCam: {fileID: 0}
-  defMat: {fileID: 0}
-  blackMat: {fileID: 0}
+  posInArray: {x: 0, y: 0}

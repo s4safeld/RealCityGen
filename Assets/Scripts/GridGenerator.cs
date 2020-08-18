@@ -27,6 +27,7 @@ public class GridGenerator : MonoBehaviour
     public float minBuildingHeigth;
     public float minBuildingWidth;
     public float minBuildingLength;
+    public generateBuilding buildingGenerator;
 
 
 
@@ -250,6 +251,7 @@ public class GridGenerator : MonoBehaviour
                 spawned = Instantiate(cell, spawnPos, Quaternion.identity);
                 spawned.name = (cell.name + spawnPos);
                 spawned.transform.parent = area.transform;
+                spawned.GetComponent<Cell>().buildingGenerator = buildingGenerator;
                 spawned.GetComponent<Cell>().Initialise(this);
                 globalInformation.cellsTotal++;
                 i++;
