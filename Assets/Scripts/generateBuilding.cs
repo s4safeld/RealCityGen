@@ -2,7 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.Profiling;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 public class generateBuilding : MonoBehaviour
@@ -18,17 +20,24 @@ public class generateBuilding : MonoBehaviour
     public float maxLength;
     public Material material;
 
+    private int seed;
+
     [SerializeField]
     public buildingStep[] steps;
 
     // Start is called before the first frame update
     private void Start()
     {
-        
+        //If you see code in Start: It should not be here, delete it, now!!
+        seed = Random.Range(0,10000000);
+        Random.InitState(seed);
+        Debug.Log(seed);
+        fire(new Vector3(0,0,0));
     }
 
     public GameObject fire(Vector3 position)
     {
+        //Random.InitState(globalInformation.seed + (int)(position.x - position.z));
         foreach (buildingStep step in steps)
         {
             step.initialise();
@@ -63,14 +72,51 @@ public class generateBuilding : MonoBehaviour
 
         float stepSize = 8 / (float)vertCount;
 
+        /*
+        float offset = 0;
+
+        //Alternative:
+        int sumOfAngles = (vertCount - 2) * 180;
+        float avgAngle = sumOfAngles / vertCount;
+
+        vertices2D[0] = new Vector2(0,-1);
+        vertices2D[1] = new Vector2(1*Mathf.Tan(avgAngle), 1);
+
+        for(int i = 1; i < vertCount; i++)
+        {
+            vertices2D[i] = vertices2D[i-1] - vertices2D[i-1]            
+
+        }
+
+        //---------------
+        */
+
         //Loops around a central point using Sin and Cos functions to generate random vertices in clockwise order
         float steps = 0;
         for (int i = 0; i < vertCount; i++) {
             float x = Mathf.Sin(Random.Range(steps, steps + stepSize));
+            Debug.Log(i+".x = " + x);
             float z = Mathf.Cos(Random.Range(steps, steps + stepSize));
+            Debug.Log(i + ".z = " + z);
             vertices2D[i] = new Vector2(x, z);
-            vertices2D[i] *= Random.Range(minRange, maxRange);
-            steps += stepSize;
+            //vertices2D[i] *= Random.Range(minRange, maxRange);
+
+            if (i > 1)
+            {
+                Debug.Log("hier!");
+                if(Vector3.Angle(vertices2D[i-2] - vertices2D[i-1], vertices2D[i] - vertices2D[i-1]) < 45)
+                {
+                    i--;
+                }
+                else
+                {
+                    steps += stepSize;
+                }
+            }
+            else
+            {
+                steps += stepSize;
+            }
         }
 
         //computes surface triangles for 2D Mesh
@@ -99,6 +145,8 @@ public class generateBuilding : MonoBehaviour
         mesh.RecalculateBounds();
 
         return mesh;
+
+        
     }
     Mesh extrudeMesh(Mesh mesh, Vector3 location) {
 
@@ -266,7 +314,19 @@ public class generateBuilding : MonoBehaviour
                 floors[i] = new GameObject("mesh", typeof(MeshFilter), typeof(MeshRenderer));
                 floors[i].GetComponent<MeshFilter>().mesh = new Mesh();
             }
+            //Debugging!!
+            GameObject temp;
+            for (int j = 0; j < meshes[i].vertices.Length; j++)
+            {
+                temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                temp.name = "meshes["+i+"].vertices["+j+"]";
+                temp.transform.position = meshes[i].vertices[j];
+                temp.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            }
+            //--------------
+
         }
+
 
         return floors;
     }
@@ -329,7 +389,7 @@ public class buildingStep{
 //It is not written by me, but from runevision
 //The source can be found here:
 //http://wiki.unity3d.com/index.php?title=Triangulator&_ga=2.97540694.871866967.1597588282-744620994.1584369047
-public class Triangulator
+/*public class Triangulator
 {
     private List<Vector2> m_points = new List<Vector2>();
 
@@ -446,3 +506,4 @@ public class Triangulator
         return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f));
     }
 }
+*/
