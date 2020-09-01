@@ -1,293 +1,77 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
-
-/*  This Script needs to be attached to the main Camera.
-*   It is going to create a Grid of Cells in a certain radius around the Camera
-*   Those Cells are special Plane GameObjects with a size given by the GlobalInformation Class
-*   The script will make sure that the Cells wont collide but will have a distance of exactly zero to each other
-*/
 
 public class GridGenerator : MonoBehaviour
 {
-    public GameObject cell;
-    private GameObject area;
-    private GameObject terrain;
-    private bool terrainGiven = true;
-    private bool initialized;
-    private int viewDistance;
-    public float density;
+    public int cellSize;
+    public int roadWith;
+
+    private BuildingGenerator[] generators;
     private float areaLength;
     private float areaWidth;
-
-    public float maxBuildingHeigth;
-    public float maxBuildingWidth;
-    public float maxBuildingLength;
-    public float minBuildingHeigth;
-    public float minBuildingWidth;
-    public float minBuildingLength;
-    public generateBuilding buildingGenerator;
-
-
-
-    //Debugging
-    private int globalIterations;
-    private int localIterations;
-    //------
-
-    public void Start()
+    private Cell[,] grid;
+    private GameObject cellCollider;
+    public GameObject getCellCollider()
     {
-        area = gameObject;
-        gameObject.GetComponent<MeshRenderer>().enabled = false;
-        Debug.Log(area.name);
-        areaLength = get2DBounds(area).x;
-        areaWidth = get2DBounds(area).y;
-
-        viewDistance = globalInformation.viewDistance;
-        terrain = globalInformation.Terrain;
-
-        density = Mathf.RoundToInt((density / (100 * 100)) * areaLength * areaWidth);
-        Debug.Log("new density: " + density);
-
-        if (area)
-        {
-            Debug.Log("Terrain found, \nfilling Terrain...");
-            fillTerrain(cell, area);
-        }
-        else
-        {
-            terrainGiven = false;
-        }
-        initialized = true;
+        return cellCollider;
     }
 
-    // Update is called once per frame
+    void Start()
+    {
+        //cellCollider = (GameObject)Instantiate(Resources.Load("Assets/Prefabs/CellCollider", typeof(GameObject)),gameObject.transform);
+        cellCollider = new GameObject();
+        generators = GetComponentsInChildren<BuildingGenerator>();
+
+        cellSize = cellSize - roadWith / 4;
+
+        areaLength = GlobalInformation.get2DBounds(gameObject).x;
+        areaWidth = GlobalInformation.get2DBounds(gameObject).y;
+
+        GameObject cellGrid = new GameObject();
+        cellGrid.name = "CellGrid";
+        cellGrid.transform.parent = transform;
+        grid = generateGrid(cellGrid.transform);
+
+        gameObject.GetComponent<MeshRenderer>().enabled = false;
+    }
+
     void Update()
     {
-        if (initialized)
+        for (int i = 0; i < areaLength / cellSize; i++)
         {
-            if (!terrainGiven)
-            {
-                //Debugging
-                //globalIterations++;
-                //foreach (Vector3 item in allGenerated) {
-                //    Debug.LogWarning(item);
-                //}
-                //----------
-
-                //List<Vector3>[] temp = realTimeGeneration(recentlyGenerated, allGenerated);
-                //recentlyGenerated = temp[0];
-                //allGenerated = temp[1];
-            }
+            Debug.DrawLine(new Vector3((i * cellSize) + (transform.position.x - areaLength / 2),5,1000), new Vector3((i * cellSize) + (transform.position.x - areaLength / 2), 5, -1000), Color.red);
+        }
+        for (int i = 0; i < areaWidth/ cellSize; i++)
+        {
+            Debug.DrawLine(new Vector3(1000, 5, (i * cellSize) + (transform.position.y - areaWidth / 2)), new Vector3(-1000, 5, (i * cellSize) + (transform.position.y - areaWidth / 2)), Color.red);
         }
     }
 
-    //Realtime Generation Algorithm
-    //---------------------------
-    //
-    //This algorithm should be first started with a set size of 1. it then loops around the position in a Rhombus
-    //The Top down functionality of this algorithm is sketched out in the following:
-    //
-    //The numbers represent the order of computation
-    //
-    //           5
-    //
-    //      8    1    6
-    //
-    // 20   4    0    2  10
-    //
-    //      16   3   11
-    //
-    //          15
-    //
-    //----------------------
-    /*List<Vector3>[] realTimeGeneration(List<Vector3> oldGenerated, List<Vector3> allGeneratedLocal)
+    Cell[,] generateGrid(Transform parent)
     {
-        List<Vector3> newGenerated = new List<Vector3>();
+        Cell[,] grid = new Cell[(int)areaLength,(int)areaWidth];
 
-        //Debugging--------
-        localIterations = 0;
-        //-----------------
-
-        //do the following for the outer edges of the Rhombus
-        foreach (Vector3 pos in oldGenerated)
+        for(int i = 0; i<areaLength/cellSize; i++)
         {
-            localIterations++;
-            Debug.Log("computing chunkLocations for: " + pos);
-
-            //compute possible chunkLocations
-            Vector3 north = new Vector3(pos.x + chunkSize, 0, pos.z);
-            Vector3 east = new Vector3(pos.x, 0, pos.z - chunkSize);
-            Vector3 south = new Vector3(pos.x - chunkSize, 0, pos.z);
-            Vector3 west = new Vector3(pos.x, 0, pos.z + chunkSize);
-
-            newGenerated.Add(north);
-            newGenerated.Add(east);
-            newGenerated.Add(south);
-            newGenerated.Add(west);
-
-            //Debugging--------
-            Debug.Log(north + " was added because its north of " + pos);
-            Debug.Log(east + " was added because its east of " + pos);
-            Debug.Log(south + " was added because its south of " + pos);
-            Debug.Log(west + " was added because its west of " + pos);
-
-            foreach (Vector3 item in newGenerated)
+            for(int j = 0; j<areaWidth/cellSize; j++)
             {
-                Debug.Log(item + " is in newGenerated by iteration: " + globalIterations + "." + localIterations);
+                GameObject cell = new GameObject();
+                cell.transform.position = new Vector3(
+                    cellSize/2+(j*cellSize)+(transform.position.x - areaLength/2), 
+                    0,
+                    cellSize/2+(i*cellSize)+(transform.position.z - areaWidth/2)
+                );
+                cell.transform.parent = parent;
+                cell.name = "cell" + cell.transform.position;
+                cell.AddComponent<Cell>();
+                //TODO: assignement of generator
+                cell.GetComponent<Cell>().Initialise(generators[0]);
+                grid[i,j] = cell.GetComponent<Cell>();
             }
-            Debug.LogWarning("The following list is for iteration: " + globalIterations + "." + localIterations);
-            foreach (Vector3 item in allGeneratedLocal)
-            {
-                Debug.Log(item + " is in allGenerated");
-            }
-            Debug.LogWarning("Listing is finished");
-            //-----------------
-
-            foreach (Vector3 item in allGeneratedLocal)
-            {
-                if (north == item || Vector3.Distance(globalInformation.position, north) > viewDistance)
-                {
-                    north = Vector3.one;
-                }
-                if (east == item || Vector3.Distance(globalInformation.position, east) > viewDistance)
-                {
-                    west = Vector3.one;
-                }
-                if (south == item || Vector3.Distance(globalInformation.position, south) > viewDistance)
-                {
-                    south = Vector3.one;
-                }
-                if (west == item || Vector3.Distance(globalInformation.position, west) > viewDistance)
-                {
-                    west = Vector3.one;
-                }
-            }
-
-            if (north != Vector3.one)
-            {
-                allGeneratedLocal.Add(north);
-                allGeneratedSize++;
-                generateChunk(north, grid.transform, density);
-            }
-            if (east != Vector3.one)
-            {
-                allGeneratedLocal.Add(east);
-                generateChunk(east, grid.transform, density);
-                allGeneratedSize++;
-            }
-            if (south != Vector3.one)
-            {
-                allGeneratedLocal.Add(south);
-                generateChunk(south, grid.transform, density);
-                allGeneratedSize++;
-            }
-            if (west != Vector3.one)
-            {
-
-                allGeneratedLocal.Add(west);
-                generateChunk(west, grid.transform, density);
-                allGeneratedSize++;
-            }
-            //Debugging--------------
-            if (allGeneratedSize >= 10)
-            {
-                Debug.Break();
-            }
-            //-----------------------
-            globalInformation.chunksTotal = allGeneratedSize;
         }
 
-        List<Vector3>[] returnValues = new List<Vector3>[2];
-        returnValues[0] = newGenerated;
-        returnValues[1] = allGeneratedLocal;
-
-        return returnValues;
-    }*/
-
-    void fillTerrain(GameObject cell, GameObject area)
-    {
-        float rangeX = areaLength;
-        float rangeZ = areaWidth;
-        GameObject spawned;
-
-        density = Mathf.RoundToInt(density);
-
-        Vector3[] cells = new Vector3[(int)density];
-        Vector3 pos = new Vector3(area.transform.position.x - areaLength / 2, 0, area.transform.position.z - areaWidth / 2);
-
-        float buildRange = Mathf.Sqrt(Mathf.Pow((maxBuildingLength / 2), 2) + Mathf.Pow((maxBuildingWidth / 2),2))*2;
-
-        int escapeThreshold = 0;
-        for (int i = 0; i < density;)
-        {
-            if (escapeThreshold >= 500)
-            {
-                Debug.LogError("Escaped cell generation process unexptectedly, Consider using a lower density than: " + density);
-                break;
-            }
-
-            bool free = true;
-            float xPos = Random.Range(maxBuildingWidth / 2, rangeX - maxBuildingWidth / 2);
-            float zPos = Random.Range(maxBuildingLength / 2, rangeZ - maxBuildingLength / 2);
-            Vector3 spawnPos = new Vector3(pos.x + xPos, 0, pos.z + zPos);
-
-            for (int j = 0; j < i; j++)
-            {
-                if (Vector3.Distance(cells[j], spawnPos) < buildRange && Vector3.Distance(cells[j], spawnPos) < buildRange)
-                {
-                    free = false;
-                    break;
-                }
-            }
-
-            escapeThreshold++;
-
-            if (free)
-            {
-                escapeThreshold = 0;
-                cells[i] = spawnPos;
-                spawned = Instantiate(cell, spawnPos, Quaternion.identity);
-                spawned.name = (cell.name + spawnPos);
-                spawned.transform.parent = area.transform;
-                spawned.GetComponent<Cell>().buildingGenerator = buildingGenerator;
-                spawned.GetComponent<Cell>().Initialise(this);
-                globalInformation.cellsTotal++;
-                i++;
-            }
-        }
-        //Debugging
-        //-----------
+        return grid;
     }
 
-    int hash(int key)
-    {
-        key += ~(key << 15);
-        key ^= (key >> 10);
-        key += (key << 3);
-        key ^= (key >> 6);
-        key += ~(key << 11);
-        key ^= (key >> 16);
-        return key;
-    }
-
-    GameObject getGridCell(GameObject obj)
-    {
-        Debug.Log(obj.name);
-        if (obj.tag == "GridCell")
-        {
-            return obj;
-        }
-        else
-        {
-            return getGridCell(obj.transform.parent.gameObject);
-        }
-    }
-
-    public static Vector2 get2DBounds(GameObject obj)
-    {
-        Bounds bounds = obj.GetComponent<MeshFilter>().sharedMesh.bounds;
-        return new Vector2(obj.transform.localScale.x * bounds.size.x, obj.transform.localScale.z * bounds.size.z);
-    }
 }

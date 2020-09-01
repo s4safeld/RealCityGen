@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6221010951936270790}
   - component: {fileID: 6221010951936270791}
   - component: {fileID: 6221010951936270788}
-  - component: {fileID: 6221010951936270786}
+  - component: {fileID: -2427032618139525839}
   m_Layer: 0
   m_Name: GenerationCube
   m_TagString: Untagged
@@ -80,7 +80,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!114 &6221010951936270786
+--- !u!114 &-2427032618139525839
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -89,15 +89,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6221010951936270787}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 105fc4ecd685a1949810a07c5f68600d, type: 3}
+  m_Script: {fileID: 11500000, guid: ae948734eb34a90448550da2804ff736, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cell: {fileID: 1862018284774071965, guid: fae075621a625aa4f8fa023683bad0ab, type: 3}
-  area: {fileID: 6221010951936270787}
-  density: 20
-  maxBuildingHeigth: 20
-  maxBuildingWidth: 20
-  maxBuildingLength: 20
-  minBuildingHeigth: 20
-  minBuildingWidth: 20
-  minBuildingLength: 20
+  cellSize: 10

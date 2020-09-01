@@ -8,18 +8,18 @@ public abstract class SimplePolygon : MonoBehaviour
     {
         if(corners == 4)
         {
-            Debug.LogWarning("Simple2DPolygon: This will just create a simple square, are you sure you dont want to use rectangle()?");
+            Debug.LogWarning("SimplePolygon: This will just create a simple square, are you sure you dont want to use rectangle()?");
         }
         if(corners < 3)
         {
-            Debug.LogError("SImple2DPolygon: The number of corners is lower than 3, which will not create a real Polygon");
+            Debug.LogError("SImplePolygon: The number of corners is lower than 3, which will not create a real Polygon");
         }
         float angle = 360 / corners;
         Vector2[] vertices2D = new Vector2[corners];
         vertices2D[0] = new Vector2(size, 0);
         for (int i = 1; i < vertices2D.Length; i++)
         {
-            vertices2D[i] = Quaternion.Euler(0, 0, angle) * vertices2D[i - 1];
+            vertices2D[i] = Quaternion.Euler(0, 0, -angle) * vertices2D[i - 1];
         }
 
         Triangulator tr = new Triangulator(vertices2D);

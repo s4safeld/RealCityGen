@@ -6,55 +6,36 @@ using TMPro;
 
 public class Cell : MonoBehaviour
 {
-    public GameObject spawnBlock;
-    private GameObject spawnedBlock;
     private Camera mainCam;
     private GameObject cellCollider;
     private Transform camTransform;
     private Transform groundCursor;
-    private ArrayList colliders;
     private int viewDistance;
     private float edgelength;
-    private int localSeed;
-    private float height;
-    private float width;
-    private float length;
-    private TextMeshPro tmp;
+    public int localSeed;
     private GridGenerator gridGenerator;
-    public Vector2 posInArray;
-    public generateBuilding buildingGenerator;
+    public BuildingGenerator buildingGenerator;
     public GameObject building;
 
     private bool generated = false;
     private bool generationAllowed = true;
-    private bool initialized = false;
     private bool disabled = false;
     private bool initialised = false;
 
     private float distance;
 
-    private void Start()
+    public void Initialise(BuildingGenerator bg)
     {
-
-    }
-
-    public void Initialise(GridGenerator parent)
-    {
+        gridGenerator = bg.gridGenerator;
+        edgelength = gridGenerator.cellSize;
         generationAllowed = true;   //Temporary
-        cellCollider = globalInformation.cellCollider;
+        cellCollider = gridGenerator.getCellCollider();
         mainCam = Camera.main;
         camTransform = mainCam.gameObject.transform;
-        groundCursor = globalInformation.groundCursor.transform;
-        viewDistance = globalInformation.viewDistance;
-        gridGenerator = parent;
-
-
-        //temporary
-        width = Random.Range(gridGenerator.minBuildingWidth, gridGenerator.maxBuildingWidth);
-        height = Random.Range(gridGenerator.minBuildingHeigth, gridGenerator.maxBuildingHeigth);
-        length = Random.Range(gridGenerator.minBuildingLength, gridGenerator.maxBuildingLength);
-        //----------
-
+        groundCursor = GlobalInformation.groundCursor.transform;
+        viewDistance = GlobalInformation.viewDistance;
+        buildingGenerator = bg;
+        localSeed = hash((int)transform.position.x ^ hash(GlobalInformation.worldSeed ^ (int)transform.position.z));
         initialised = true;
     }
     public void Update()
@@ -74,7 +55,7 @@ public class Cell : MonoBehaviour
                     {
                         if (!generated)
                         {
-                            globalInformation.cellsVisible++;
+                            GlobalInformation.cellsVisible++;
                             //Debug.DrawLine(transform.position, groundCursor.position, Color.white);
                             Generate();
                         }
@@ -83,7 +64,7 @@ public class Cell : MonoBehaviour
                     {
                         if (generated)
                         {
-                            globalInformation.cellsVisible--;
+                            GlobalInformation.cellsVisible--;
                             unGenerate();
                         }
                     }
@@ -98,32 +79,22 @@ public class Cell : MonoBehaviour
 
     void Generate()
     {
-        if (!initialized)
+        /*if (!initialised)
         {
             cellCollider.transform.position = transform.position;
             generationAllowed = cellCollider.GetComponent<CellCollider>().ask();
-            initialized = true;
         }
         else
-        {
+        {*/
             if (generationAllowed && !generated)
             {
                 Debug.Log(name + " is generating cube");
                 generated = true;
-                /*/temporary--------
-                spawnedBlock = Instantiate(spawnBlock, transform.position, Quaternion.identity, transform);
-                tmp = spawnedBlock.transform.GetChild(0).GetComponent<TextMeshPro>();
-                tmp.transform.SetParent(transform);
-                spawnedBlock.transform.localScale = new Vector3(width, height, length);
-                spawnedBlock.transform.position += new Vector3(0, getHeight(spawnedBlock) / 2, 0);
-                tmp.transform.position = tmp.transform.position + new Vector3(0, 4, -5);
-                tmp.transform.SetParent(spawnedBlock.transform);
-                tmp.text = localSeed + "\n" + width + "\n" + height + "\n" + length;
-                //-------------------*/
-                building = buildingGenerator.fire(transform.position);
-                building.transform.parent = gameObject.transform;
+                building = buildingGenerator.generate(localSeed);
+                building.transform.position = new Vector3(transform.position.x, building.transform.position.y, transform.position.z);
+                building.transform.parent = transform;
             }
-        }
+        //}
     }
     void unGenerate()
     {
@@ -142,7 +113,6 @@ public class Cell : MonoBehaviour
             float angle = Vector3.Angle(targetDir, groundCursor.forward);
             if (angle < (mainCam.fieldOfView))
             {
-                //Debug.Log(name + ": is in View");
                 return true;
             }
             return false;
@@ -165,10 +135,5 @@ public class Cell : MonoBehaviour
         key += ~(key << 11);
         key ^= (key >> 16);
         return key;
-    }
-    float getHeight(GameObject obj)
-    {
-        Bounds bounds = obj.GetComponent<MeshFilter>().sharedMesh.bounds;
-        return obj.transform.localScale.y * bounds.size.y;
     }
 }
