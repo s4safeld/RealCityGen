@@ -35,7 +35,7 @@ public class Cell : MonoBehaviour
         groundCursor = GlobalInformation.groundCursor.transform;
         viewDistance = GlobalInformation.viewDistance;
         buildingGenerator = bg;
-        localSeed = hash((int)transform.position.x ^ hash(GlobalInformation.worldSeed ^ (int)transform.position.z));
+        localSeed = GlobalInformation.hash((int)transform.position.x ^ GlobalInformation.hash(GlobalInformation.worldSeed ^ (int)transform.position.z));
         initialised = true;
     }
     public void Update()
@@ -88,7 +88,6 @@ public class Cell : MonoBehaviour
         {*/
             if (generationAllowed && !generated)
             {
-                Debug.Log(name + " is generating cube");
                 generated = true;
                 building = buildingGenerator.generate(localSeed);
                 building.transform.position = new Vector3(transform.position.x, building.transform.position.y, transform.position.z);
@@ -124,16 +123,5 @@ public class Cell : MonoBehaviour
         this.enabled = false;
         yield return new WaitForSeconds(.1f);
         this.enabled = true;
-    }
-
-    int hash(int key)
-    {
-        key += ~(key << 15);
-        key ^= (key >> 10);
-        key += (key << 3);
-        key ^= (key >> 6);
-        key += ~(key << 11);
-        key ^= (key >> 16);
-        return key;
     }
 }

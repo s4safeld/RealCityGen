@@ -121,6 +121,18 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &66888715 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: -2427032618139525839, guid: f74c0d87251f30347bc19bf77aebe03c,
+    type: 3}
+  m_PrefabInstance: {fileID: 157587136}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae948734eb34a90448550da2804ff736, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &157587136
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -131,12 +143,43 @@ PrefabInstance:
     - target: {fileID: -2427032618139525839, guid: f74c0d87251f30347bc19bf77aebe03c,
         type: 3}
       propertyPath: cellSize
-      value: 20
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: -2427032618139525839, guid: f74c0d87251f30347bc19bf77aebe03c,
+        type: 3}
+      propertyPath: roadWith
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: -2427032618139525839, guid: f74c0d87251f30347bc19bf77aebe03c,
+        type: 3}
+      propertyPath: perlinNoiseMultiplier
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2427032618139525839, guid: f74c0d87251f30347bc19bf77aebe03c,
+        type: 3}
+      propertyPath: roadWidth
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: -2427032618139525839, guid: f74c0d87251f30347bc19bf77aebe03c,
+        type: 3}
+      propertyPath: street
+      value: 
+      objectReference: {fileID: 1363149465488317805, guid: f5179c7c016c1684b9cc17d5d8f697fe,
+        type: 3}
+    - target: {fileID: -2427032618139525839, guid: f74c0d87251f30347bc19bf77aebe03c,
+        type: 3}
+      propertyPath: streetDensity
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 6221010951936270787, guid: f74c0d87251f30347bc19bf77aebe03c,
         type: 3}
       propertyPath: m_Name
       value: GenerationCube
+      objectReference: {fileID: 0}
+    - target: {fileID: 6221010951936270788, guid: f74c0d87251f30347bc19bf77aebe03c,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6221010951936270790, guid: f74c0d87251f30347bc19bf77aebe03c,
         type: 3}
@@ -196,17 +239,17 @@ PrefabInstance:
     - target: {fileID: 6221010951936270790, guid: f74c0d87251f30347bc19bf77aebe03c,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 210.72052
+      value: 466.5142
       objectReference: {fileID: 0}
     - target: {fileID: 6221010951936270790, guid: f74c0d87251f30347bc19bf77aebe03c,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 210.72052
+      value: 158.55876
       objectReference: {fileID: 0}
     - target: {fileID: 6221010951936270790, guid: f74c0d87251f30347bc19bf77aebe03c,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 210.72052
+      value: 678.01434
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f74c0d87251f30347bc19bf77aebe03c, type: 3}
@@ -216,6 +259,80 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 157587136}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &230540775
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 230540776}
+  - component: {fileID: 230540777}
+  m_Layer: 0
+  m_Name: BuildingGenerator (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &230540776
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 230540775}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 157587137}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &230540777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 230540775}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8046a13e1ecd22488f6921102d63c0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  steps:
+  - optional: 0
+    minFloors: 1
+    maxFloors: 5
+    minRotation: 90
+    maxRotation: 90
+    isPolygon: 0
+    minVertices: 0
+    maxVertices: 0
+    minRadius: 0
+    maxRadius: 0
+    minWidth: 20
+    maxWidth: 20
+    minLength: 20
+    maxLength: 20
+  - optional: 0
+    minFloors: 1
+    maxFloors: 5
+    minRotation: 30
+    maxRotation: 60
+    isPolygon: 0
+    minVertices: 0
+    maxVertices: 0
+    minRadius: 0
+    maxRadius: 0
+    minWidth: 20
+    maxWidth: 20
+    minLength: 10
+    maxLength: 20
+  material: {fileID: 2100000, guid: 2814efe89a8138546b4ea099e9845bac, type: 2}
+  gridGenerator: {fileID: 66888715}
 --- !u!1 &311728749
 GameObject:
   m_ObjectHideFlags: 0
@@ -438,25 +555,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   steps:
   - optional: 0
-    minFloors: 3
-    maxFloors: 5
-    polygon: 0
-    minRotation: 10
-    maxRotation: 50
+    minFloors: 1
+    maxFloors: 10
+    minRotation: -90
+    maxRotation: 90
+    isPolygon: 0
     minVertices: 0
     maxVertices: 0
     minRadius: 0
     maxRadius: 0
     minWidth: 8
-    maxWidth: 10
-    minLength: 8
+    maxWidth: 20
+    minLength: 5
     maxLength: 10
   - optional: 1
-    minFloors: 3
-    maxFloors: 3
-    polygon: 0
-    minRotation: 10
-    maxRotation: 50
+    minFloors: 1
+    maxFloors: 10
+    minRotation: 30
+    maxRotation: 60
+    isPolygon: 0
     minVertices: 0
     maxVertices: 0
     minRadius: 0
@@ -466,21 +583,21 @@ MonoBehaviour:
     minLength: 7
     maxLength: 8
   - optional: 0
-    minFloors: 5
-    maxFloors: 6
-    polygon: 0
+    minFloors: 1
+    maxFloors: 10
     minRotation: 0
     maxRotation: 0
+    isPolygon: 0
     minVertices: 0
     maxVertices: 0
     minRadius: 0
     maxRadius: 0
     minWidth: 8
     maxWidth: 10
-    minLength: 8
-    maxLength: 10
+    minLength: 5
+    maxLength: 20
   material: {fileID: 2100000, guid: 2814efe89a8138546b4ea099e9845bac, type: 2}
-  gridGenerator: {fileID: 0}
+  gridGenerator: {fileID: 66888715}
 --- !u!1 &433788933
 GameObject:
   m_ObjectHideFlags: 0
@@ -958,6 +1075,66 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 750055405}
   m_CullTransparentMesh: 0
+--- !u!1 &846854612
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 846854613}
+  - component: {fileID: 846854614}
+  m_Layer: 0
+  m_Name: BuildingGenerator (3)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &846854613
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 846854612}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 157587137}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &846854614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 846854612}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8046a13e1ecd22488f6921102d63c0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  steps:
+  - optional: 0
+    minFloors: 10
+    maxFloors: 10
+    minRotation: -90
+    maxRotation: 90
+    isPolygon: 0
+    minVertices: 0
+    maxVertices: 0
+    minRadius: 0
+    maxRadius: 0
+    minWidth: 8
+    maxWidth: 20
+    minLength: 5
+    maxLength: 10
+  material: {fileID: 2100000, guid: 2814efe89a8138546b4ea099e9845bac, type: 2}
+  gridGenerator: {fileID: 66888715}
 --- !u!1 &936664362
 GameObject:
   m_ObjectHideFlags: 0
@@ -1218,7 +1395,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eec70c4668357ab488280a13c031912c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  setViewDistance: 100
+  setViewDistance: 300
   setPlayer: {fileID: 1248118897}
   setWorldSeed: 
 --- !u!4 &1068686176
@@ -1558,7 +1735,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae4117713a7c924489d34b5e584470db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementSpeed: 10
+  movementSpeed: 50
   rotationSpeed: 200
 --- !u!143 &1248118900
 CharacterController:
@@ -1578,6 +1755,52 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &1337901837
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1337901838}
+  - component: {fileID: 1337901839}
+  m_Layer: 0
+  m_Name: BuildingGenerator (2)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1337901838
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1337901837}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 157587137}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1337901839
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1337901837}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8046a13e1ecd22488f6921102d63c0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  steps: []
+  material: {fileID: 2100000, guid: 2814efe89a8138546b4ea099e9845bac, type: 2}
+  gridGenerator: {fileID: 66888715}
 --- !u!1 &1473577959
 GameObject:
   m_ObjectHideFlags: 0
