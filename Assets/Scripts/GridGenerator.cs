@@ -6,10 +6,19 @@ using Random = UnityEngine.Random;
 
 public class GridGenerator : MonoBehaviour
 {
+    public bool automaticCellsize;
     public int cellSize;
     public int roadWidth;
     public float perlinNoiseMultiplier;
     public float streetDensity;
+    public bool automaticStreetScale;
+
+    public GameObject street;
+    public GameObject crossroad;
+    public GameObject TJunction;
+    public GameObject streetCorner;
+    public GameObject streetEnd;
+    public GameObject connection;
 
     private BuildingGenerator[] generators;
     private float areaLength;
@@ -17,9 +26,7 @@ public class GridGenerator : MonoBehaviour
     private GameObject[,] cellGrid;
     private Node[,] streetGrid;
     private GameObject cellCollider;
-    public GameObject street;
-    public GameObject crossroad;
-    public GameObject TJunction;
+    
     public GameObject getCellCollider()
     {
         return cellCollider;
@@ -31,31 +38,37 @@ public class GridGenerator : MonoBehaviour
         cellCollider = new GameObject();
         generators = GetComponentsInChildren<BuildingGenerator>();
 
-        float biggestSize = 0;
-        foreach(BuildingGenerator generator in generators)
+        if (automaticCellsize)
         {
-            foreach(buildingStep step in generator.steps)
+            float biggestSize = 0;
+            foreach (BuildingGenerator generator in generators)
             {
-                if (step.isPolygon)
+                foreach (buildingStep step in generator.steps)
                 {
-                    if(biggestSize < step.maxRadius * 2)
+                    if (step.isPolygon)
                     {
-                        Debug.Log("step.maxRadius * 2 = " + step.maxRadius * 2);
-                        biggestSize = step.maxRadius * 2;
+                        if (biggestSize < step.maxRadius * 2)
+                        {
+                            Debug.Log("step.maxRadius * 2 = " + step.maxRadius * 2);
+                            biggestSize = step.maxRadius * 2;
+                        }
                     }
-                }
-                else
-                {
-                    if(biggestSize < Mathf.Sqrt(step.maxWidth* step.maxWidth + step.maxLength* step.maxLength))
+                    else
                     {
-                        Debug.Log(String.Format("Mathf.Sqrt({0}*{0}+{1}*{1}) = {2}", step.maxWidth, step.maxLength, Mathf.Sqrt(step.maxWidth * step.maxWidth + step.maxLength * step.maxLength)));
-                        biggestSize = Mathf.Sqrt(step.maxWidth * step.maxWidth + step.maxLength * step.maxLength);
+                        if (biggestSize < Mathf.Sqrt(step.maxWidth * step.maxWidth + step.maxLength * step.maxLength)*2)
+                        {
+                            Debug.Log(String.Format("Mathf.Sqrt({0}*{0}+{1}*{1}) = {2})*2", step.maxWidth, step.maxLength, Mathf.Sqrt(step.maxWidth * step.maxWidth + step.maxLength * step.maxLength)*2));
+                            biggestSize = Mathf.Sqrt(step.maxWidth * step.maxWidth + step.maxLength * step.maxLength)*2;
+                        }
                     }
                 }
             }
+            cellSize = Mathf.CeilToInt(biggestSize) + roadWidth / 4;
         }
-        cellSize = Mathf.CeilToInt(biggestSize) + roadWidth / 4;
-
+        if (automaticStreetScale)
+        {
+            //TODO
+        }
         areaLength = GlobalInformation.get2DBounds(gameObject).x;
         areaWidth = GlobalInformation.get2DBounds(gameObject).y;
 
@@ -67,36 +80,9 @@ public class GridGenerator : MonoBehaviour
         GameObject streetGridParent = new GameObject();
         streetGridParent.name = "StreetGrid";
         streetGridParent.transform.parent = transform;
-        streetGrid = generateStreetGrid();
-
-
-        //Debugging
-        GameObject temp;
-        for (int i = 0; i < (int)areaLength/cellSize - 1; i++)
-        {
-            for (int j = 0; j < (int)areaWidth/cellSize - 1; j++)
-            {
-                temp = new GameObject();
-                temp.transform.position = streetGrid[i, j].position;
-                temp.transform.name = ""+ streetGrid[i, j].position;
-                temp.transform.parent = streetGridParent.transform;
-            }
-        }
-        //-------
+        streetGrid = generateStreetGrid(streetGridParent.transform);
 
         gameObject.GetComponent<MeshRenderer>().enabled = false;
-    }
-
-    void Update()
-    {
-        for (int i = 0; i < areaLength / cellSize; i++)
-        {
-            Debug.DrawLine(new Vector3((i * cellSize) + (transform.position.x - areaLength / 2),5,1000), new Vector3((i * cellSize) + (transform.position.x - areaLength / 2), 5, -1000), Color.red);
-        }
-        for (int i = 0; i < areaWidth/ cellSize; i++)
-        {
-            Debug.DrawLine(new Vector3(1000, 5, (i * cellSize) + (transform.position.y - areaWidth / 2)), new Vector3(-1000, 5, (i * cellSize) + (transform.position.y - areaWidth / 2)), Color.red);
-        }
     }
 
     GameObject[,] generateCellGrid(Transform parent)
@@ -117,29 +103,29 @@ public class GridGenerator : MonoBehaviour
                 cell.name = "cell" + cell.transform.position;
                 cell.AddComponent<Cell>();
                 value = Mathf.PerlinNoise(i*perlinNoiseMultiplier,j*perlinNoiseMultiplier);
-                Debug.Log(value+", i: "+i+", j:"+j);
-                if(value <1.0f)
-                    cell.GetComponent<Cell>().Initialise(generators[0]);
-                if(value < 0.75f)
-                    cell.GetComponent<Cell>().Initialise(generators[1]);
-                if (value < 0.5f)
-                    cell.GetComponent<Cell>().Initialise(generators[2]);
-                if (value < 0.25f)
-                    cell.GetComponent<Cell>().Initialise(generators[3]);
+                //Debug.Log(value+", i: "+i+", j:"+j);
+                float step = 1 / (float)generators.Length;
+                for(int k = 0; k<generators.Length; k++)
+                {
+                    if (value < step*k+step)
+                    {
+                        cell.GetComponent<Cell>().Initialise(generators[k]);
+                        break;
+                    }
+                }
                 grid[i, j] = cell;
             }
         }
         return grid;
     }
-
-    Node[,] generateStreetGrid()
+    Node[,] generateStreetGrid(Transform parent)
     {
-        Node[,] grid = new Node[(int)areaLength/cellSize+1, (int)areaWidth/cellSize+1];
-        for(int i = 0; i<(int)areaLength/cellSize; i++)
+        Node[,] grid = new Node[(int)areaLength/cellSize, (int)areaWidth/cellSize];
+        for(int i = 0; i<grid.GetLength(0); i++)
         {
-            for (int j = 0; j < (int)areaWidth/cellSize; j++)
+            for (int j = 0; j < grid.GetLength(1); j++)
             {
-                Debug.Log("i:" + i + "| j:" + j);
+                //Debug.Log("i:" + i + "| j:" + j);
                 grid[i, j] = new Node(new Vector3(
                     cellGrid[i, j].transform.position.x + cellSize/2,
                     0,
@@ -158,34 +144,174 @@ public class GridGenerator : MonoBehaviour
                 if (Random.Range(0.0f, 1.0f) > streetDensity)
                 {
                     GameObject streetWest = Instantiate(street, new Vector3(grid[i,j].position.x,0.1f,grid[i,j].position.z - cellSize / 2), street.transform.rotation);
-                    grid[i, j].roadWest = true;
-                    try { grid[i - 1, j].roadEast = true; } catch (Exception) { }
+                    streetWest.AddComponent<Street>();
+                    streetWest.name = "Street_x="+grid[i, j].position.x+", z="+(grid[i, j].position.z-cellSize/2);
+                    streetWest.transform.parent = parent;
+                    grid[i, j].roadEast = true;
+                    try { grid[i, j-1].roadWest = true; } catch (Exception) { }
                 }
+                //Instantiate street to the south
                 if (Random.Range(0.0f, 1.0f) > streetDensity)
                 {
                     GameObject streetSouth = Instantiate(street, new Vector3(grid[i, j].position.x - cellSize / 2, 0.1f, grid[i, j].position.z ), street.transform.rotation);
+                    streetSouth.AddComponent<Street>();
+                    streetSouth.name = "Street_x=" + (grid[i, j].position.x - cellSize / 2) + ", z=" + grid[i, j].position.z;
+                    streetSouth.transform.parent = parent;
                     streetSouth.transform.Rotate(new Vector3(0,90,0));
                     grid[i, j].roadSouth = true;
-                    try { grid[i, j-1].roadNorth = true; } catch (Exception) { }
+                    try { grid[i-1, j].roadNorth = true; } catch (Exception) { }
                 }
             }
         }
-
+        
+        //Connect the streets
+        GameObject con = new GameObject();
+        foreach (Node n in grid)
+        {
+            if (n.roadNorth && n.roadSouth && n.roadEast && n.roadWest)
+                con = crossRoad(n);
+            if (n.roadNorth && n.roadSouth && n.roadEast && !n.roadWest)
+                con = tJunction(n);
+            if (!n.roadNorth && n.roadSouth && n.roadEast && n.roadWest)
+                con = tJunction(n);
+            if (n.roadNorth && n.roadSouth && !n.roadEast && n.roadWest)
+                con = tJunction(n);
+            if (n.roadNorth && !n.roadSouth && n.roadEast && n.roadWest)
+                con = tJunction(n);
+            if (!n.roadNorth && !n.roadSouth && n.roadEast && n.roadWest)
+                con = connectHorizontal(n);
+            if (n.roadNorth && n.roadSouth && !n.roadEast && !n.roadWest)
+                con = connectVertical(n);
+            if (n.roadNorth && !n.roadSouth && n.roadEast && !n.roadWest)
+                con = corner(n);
+            if (!n.roadNorth && n.roadSouth && n.roadEast && !n.roadWest)
+                con = corner(n);
+            if (!n.roadNorth && n.roadSouth && !n.roadEast && n.roadWest)
+                con = corner(n);
+            if(n.roadNorth && !n.roadSouth && !n.roadEast && n.roadWest)
+                con = corner(n);
+            if (n.roadNorth && !n.roadSouth && !n.roadEast && !n.roadWest)
+                con = end(n);
+            if (!n.roadNorth && n.roadSouth && !n.roadEast && !n.roadWest)
+                con = end(n);
+            if (!n.roadNorth && !n.roadSouth && n.roadEast && !n.roadWest)
+                con = end(n);
+            if (!n.roadNorth && !n.roadSouth && !n.roadEast && n.roadWest)
+                con = end(n);
+            con.transform.parent = parent;
+            try { con.GetComponent<Street>().setNode(n); } catch (Exception) { }
+        }
         return grid;
     }
 
-}
-
-public class Node
-{
-    public Vector3 position;
-    public bool roadNorth = false;
-    public bool roadSouth = false;
-    public bool roadEast = false;
-    public bool roadWest = false;
-
-    public Node(Vector3 pos)
+    private GameObject end(Node node)
     {
-        position = pos;
+        GameObject end = Instantiate(streetEnd, new Vector3(node.position.x, node.position.y+0.1f, node.position.z), streetEnd.transform.rotation);
+        end.AddComponent<Street>();
+        if (node.roadNorth)
+        {
+            end.name = "Street-End_North at: " + node.position;
+            end.transform.Rotate(new Vector3(0, 0, 0));
+        }
+        if (node.roadEast)
+        {
+            end.name = "Street-End_East at: " + node.position;
+            end.transform.Rotate(new Vector3(0, 90, 0));
+        }
+        if (node.roadWest)
+        {
+            end.name = "Street-End_West at: " + node.position;
+            end.transform.Rotate(new Vector3(0, -90, 0));
+        }
+        if (node.roadSouth)
+        {
+            end.name = "Street-End_South at: " + node.position;
+            end.transform.Rotate(new Vector3(0, 180, 0));
+        }
+
+        return end;
+    }
+    private GameObject corner(Node node)
+    {
+        GameObject corner = Instantiate(streetCorner, new Vector3(node.position.x, node.position.y + 0.1f, node.position.z), streetCorner.transform.rotation);
+        corner.AddComponent<Street>();
+        if (node.roadNorth && node.roadEast)
+        {
+            corner.name = "Corner for North and East at: " + node.position;
+            corner.transform.Rotate(new Vector3(0, 180, 0));
+        }
+        if (node.roadEast && node.roadSouth)
+        {
+            corner.name = "Corner for East and South at: " + node.position;
+            corner.transform.Rotate(new Vector3(0, -90, 0));
+        }
+        if (node.roadSouth && node.roadWest)
+        {
+            corner.name = "Corner for South and West at: " + node.position;
+            corner.transform.Rotate(new Vector3(0, 0, 0));
+        }
+        if (node.roadWest && node.roadNorth)
+        {
+            corner.name = "Corner for West and North at: " + node.position;
+            corner.transform.Rotate(new Vector3(0, 90, 0));
+        }
+
+        return corner;
+    }
+    private GameObject tJunction(Node node)
+    {
+        GameObject t = Instantiate(TJunction, new Vector3(node.position.x, node.position.y + 0.1f, node.position.z), TJunction.transform.rotation);
+        t.AddComponent<Street>();
+        if (!node.roadWest)
+        {
+            t.name = "Tjunction excluding West at: " + node.position;
+            t.transform.Rotate(new Vector3(0, -90, 0));
+        }
+        if (!node.roadNorth)
+        {
+            t.name = "Tjunction excluding North at: " + node.position;
+            t.transform.Rotate(new Vector3(0, 0, 0));
+        }
+        if (!node.roadEast)
+        {
+            t.name = "Tjunction excluding East at: " + node.position;
+            t.transform.Rotate(new Vector3(0, 90, 0));
+        }
+        if (!node.roadSouth)
+        {
+            t.name = "Tjunction excluding South at: " + node.position;
+            t.transform.Rotate(new Vector3(0, 180, 0));
+        }
+
+        return t;
+    }
+    private GameObject crossRoad(Node node)
+    { 
+        GameObject cross = Instantiate(crossroad, new Vector3(node.position.x, node.position.y + 0.1f, node.position.z), crossroad.transform.rotation);
+        cross.AddComponent<Street>();
+        cross.GetComponent<Street>().node = node;
+        cross.name = "Crossroad at: " + node.position;
+
+        return cross;
+    }
+    private GameObject connectVertical(Node node)
+    {
+        GameObject con = Instantiate(connection, new Vector3(node.position.x, node.position.y + 0.1f, node.position.z), connection.transform.rotation);
+        con.AddComponent<Street>();
+        con.GetComponent<Street>().node = node;
+        con.transform.Rotate(new Vector3(0, 90, 0));
+        con.name = "Connection for East and West at: " + node.position;
+
+        return con;
+    }
+    private GameObject connectHorizontal(Node node)
+    {
+        GameObject con = Instantiate(connection, new Vector3(node.position.x, node.position.y + 0.1f, node.position.z), connection.transform.rotation);
+        con.AddComponent<Street>();
+        con.GetComponent<Street>().node = node;
+        con.name = "Connection for North and South at: " + node.position;
+        con.transform.Rotate(new Vector3(0, 0, 0));
+
+        return con;
     }
 }

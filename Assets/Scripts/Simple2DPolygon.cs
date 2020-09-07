@@ -12,7 +12,7 @@ public abstract class SimplePolygon : MonoBehaviour
         }
         if(corners < 3)
         {
-            Debug.LogError("SImplePolygon: The number of corners is lower than 3, which will not create a real Polygon");
+            Debug.LogError("SimplePolygon: The number of corners is lower than 3, which will not create a real Polygon");
         }
         float angle = 360 / corners;
         Vector2[] vertices2D = new Vector2[corners];
@@ -38,7 +38,6 @@ public abstract class SimplePolygon : MonoBehaviour
         mesh.RecalculateBounds();
         return mesh;
     }
-
     public static Mesh rectangle(float sizeX, float sizeZ)
     {
         Vector3[] vertices = new Vector3[4];

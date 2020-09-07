@@ -41,7 +41,7 @@ public class GlobalInformation : MonoBehaviour
         groundCursor.transform.rotation = player.transform.rotation;
 
         //Debugging
-        Debug.DrawLine(new Vector3(0, 100, 0), new Vector3(0, 100, 30));
+        //Debug.DrawLine(new Vector3(0, 100, 0), new Vector3(0, 100, 30));
         //-----------
     }
 
@@ -62,3 +62,4 @@ public class GlobalInformation : MonoBehaviour
         return key;
     }
 }
+

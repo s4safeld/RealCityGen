@@ -92,7 +92,7 @@ public class Cell : MonoBehaviour
                 building = buildingGenerator.generate(localSeed);
                 building.transform.position = new Vector3(transform.position.x, building.transform.position.y, transform.position.z);
                 building.transform.parent = transform;
-            }
+        }
         //}
     }
     void unGenerate()

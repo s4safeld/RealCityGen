@@ -62,20 +62,23 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\Building.cs" />
     <Compile Include="Assets\Scripts\BuildingGenerator.cs" />
+    <Compile Include="Assets\Scripts\BuildingStep.cs" />
     <Compile Include="Assets\Scripts\Cell.cs" />
     <Compile Include="Assets\Scripts\CellCollider.cs" />
-    <Compile Include="Assets\Scripts\CreateMeshCollider.cs" />
-    <Compile Include="Assets\Scripts\DrawFrustumCorners.cs" />
+    <Compile Include="Assets\Scripts\Deprecated\Building.cs" />
+    <Compile Include="Assets\Scripts\Deprecated\CreateMeshCollider.cs" />
+    <Compile Include="Assets\Scripts\Deprecated\DrawFrustumCorners.cs" />
+    <Compile Include="Assets\Scripts\Deprecated\GridGeneratorOld.cs" />
+    <Compile Include="Assets\Scripts\Deprecated\generateBuilding.cs" />
+    <Compile Include="Assets\Scripts\Deprecated\globalInformationOld.cs" />
     <Compile Include="Assets\Scripts\GlobalInformation.cs" />
     <Compile Include="Assets\Scripts\GridGenerator.cs" />
-    <Compile Include="Assets\Scripts\GridGeneratorOld.cs" />
+    <Compile Include="Assets\Scripts\Node.cs" />
     <Compile Include="Assets\Scripts\PlayerMovement.cs" />
     <Compile Include="Assets\Scripts\Simple2DPolygon.cs" />
+    <Compile Include="Assets\Scripts\Street.cs" />
     <Compile Include="Assets\Scripts\Triangulator.cs" />
-    <Compile Include="Assets\Scripts\generateBuilding.cs" />
-    <Compile Include="Assets\Scripts\globalInformationOld.cs" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro.cginc" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Bitmap.shader" />

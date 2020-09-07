@@ -15,12 +15,12 @@ public class BuildingGenerator : MonoBehaviour
     void Start()
     {
         gridGenerator = GetComponentInParent<GridGenerator>();
-        Debug.Log(gridGenerator);
     }
 
     // Update is called once per frame
     public GameObject generate(int localSeed)
     {
+        
         Random.InitState(localSeed);
         int height = 0;
         int heightGenerated = 0;
@@ -43,6 +43,9 @@ public class BuildingGenerator : MonoBehaviour
                     -heightGenerated,
                     Random.Range(0, gridGenerator.cellSize/2 - steps[i].getRadius())
                 ));
+                mesh.RecalculateBounds();
+                mesh.RecalculateNormals();
+                mesh.RecalculateTangents();
                 heightGenerated += steps[i].getFloors() * 2;
                 floors[i] = new GameObject("mesh", typeof(MeshFilter), typeof(MeshRenderer));
                 floors[i].GetComponent<MeshFilter>().mesh = mesh;
@@ -54,22 +57,47 @@ public class BuildingGenerator : MonoBehaviour
                 Mesh mesh;
                 mesh = extrudeMesh(polygon, new Vector3(0, -height, 0));
                 mesh = moveMesh(mesh, new Vector3(
-                    Random.Range(0, gridGenerator.cellSize/2 - steps[i].getLength()),
+                    Random.Range(0, gridGenerator.cellSize/2 - Mathf.Sqrt(steps[i].getLength()* steps[i].getLength() + steps[i].getWidth()* steps[i].getWidth())),
                     -heightGenerated,
-                    Random.Range(0, gridGenerator.cellSize/2 - steps[i].getWidth())
+                    Random.Range(0, gridGenerator.cellSize/2 - Mathf.Sqrt(steps[i].getLength() * steps[i].getLength() + steps[i].getWidth() * steps[i].getWidth()))
                 ));
+                mesh.RecalculateBounds();
+                mesh.RecalculateNormals();
+                mesh.RecalculateTangents();
                 heightGenerated += steps[i].getFloors() * 2;
                 floors[i] = new GameObject("mesh", typeof(MeshFilter), typeof(MeshRenderer));
                 floors[i].GetComponent<MeshFilter>().mesh = mesh;
                 floors[i].transform.Rotate(new Vector3(0, steps[i].getRotation(), 0));
             }
         }
+        
+        foreach (GameObject floor in floors)
+        {
+            for (int i = 0; i < floor.GetComponent<MeshFilter>().mesh.uv.Length/2; i+=2)
+            {
+                floor.GetComponent<MeshFilter>().mesh.uv[i]=new Vector2(0,0);
+                floor.GetComponent<MeshFilter>().mesh.uv[i] = new Vector2(0, 1);
+            }
+            for (int i = floor.GetComponent<MeshFilter>().mesh.uv.Length / 2; i < floor.GetComponent<MeshFilter>().mesh.uv.Length; i += 2)
+            {
+                floor.GetComponent<MeshFilter>().mesh.uv[i] = new Vector2(1, 0);
+                floor.GetComponent<MeshFilter>().mesh.uv[i] = new Vector2(1, 1);
+            }
+        }
+        
+
 
         GameObject building = new GameObject("building", typeof(MeshFilter), typeof(MeshRenderer));
         CombMeshes(floors, building);
+        building.GetComponent<MeshFilter>().mesh.RecalculateBounds();
+        building.GetComponent<MeshFilter>().mesh.RecalculateNormals();
+        building.GetComponent<MeshFilter>().mesh.RecalculateTangents();
         building.transform.position = new Vector3(0, building.transform.position.y + height, 0);
         building.GetComponent<Renderer>().material = material;
         building.AddComponent<MeshCollider>();
+
+        building.GetComponent<MeshFilter>().mesh.uv[0] = new Vector2(0, 0);
+        building.GetComponent<MeshFilter>().mesh.uv[building.GetComponent<MeshFilter>().mesh.uv.Length-1] = new Vector2(1, 1);
 
         return building;
     }
@@ -80,6 +108,8 @@ public class BuildingGenerator : MonoBehaviour
         int j;
         int k;
         int pos;
+
+        //Vector2[] uvs = mesh.uv;
 
         if (location.y > 0)
         {
@@ -228,7 +258,6 @@ public class BuildingGenerator : MonoBehaviour
         {
             meshFilters[i] = floors[i].GetComponent<MeshFilter>();
         }
-        Debug.Log(meshFilters.Length);
         for (int i = 0; i < meshFilters.Length; i++)
         {
             combine[i].mesh = meshFilters[i].sharedMesh;
@@ -237,81 +266,5 @@ public class BuildingGenerator : MonoBehaviour
         }
         building.GetComponent<MeshFilter>().mesh = new Mesh();
         building.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
-    }
-}
-
-[Serializable]
-public class buildingStep
-{
-    public bool optional;
-    public static bool generate = true;
-
-    //Floors
-    public int minFloors;
-    public int maxFloors;
-    private int floors;
-    //--------
-
-    //Rotation Value
-    public float minRotation;
-    public float maxRotation;
-    private float rotation;
-    //-------
-
-    public bool isPolygon;
-
-    //Polygon
-    public int minVertices;
-    public int maxVertices;
-    public float minRadius;
-    public float maxRadius;
-    private int vertices;
-    private float radius;
-    //-------
-
-    //Rectangle
-    public float minWidth;
-    public float maxWidth;
-    public float minLength;
-    public float maxLength;
-    private float width;
-    private float length;
-    //--------
-
-
-    public int getFloors()
-    {
-        return floors;
-    }
-    public float getRadius()
-    {
-        return radius;
-    }
-    public int getVertices()
-    {
-        return vertices;
-    }
-    public float getWidth()
-    {
-        return width;
-    }
-    public float getLength()
-    {
-        return length;
-    }
-    public float getRotation()
-    {
-        return rotation;
-    }
-
-
-    public void initialise()
-    {
-        floors   = Random.Range(minFloors,   maxFloors);
-        vertices = Random.Range(minVertices, maxVertices);
-        radius   = Random.Range(minRadius,   maxRadius);
-        width    = Random.Range(minWidth,    maxWidth);
-        length   = Random.Range(minLength,   maxLength);
-        rotation = Random.Range(minRotation, maxRotation);
     }
 }
