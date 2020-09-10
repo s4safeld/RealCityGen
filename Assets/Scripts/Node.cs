@@ -9,6 +9,7 @@ public class Node
     public bool roadSouth = false;
     public bool roadEast = false;
     public bool roadWest = false;
+    public GameObject inheritor;
 
     public Node(Vector3 pos)
     {

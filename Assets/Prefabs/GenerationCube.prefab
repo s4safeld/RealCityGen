@@ -1,5 +1,280 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3232615
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3232616}
+  - component: {fileID: 3232617}
+  m_Layer: 0
+  m_Name: BuildingGenerator (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3232616
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3232615}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 0.63579}
+  m_Children: []
+  m_Father: {fileID: 6221010951936270790}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3232617
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3232615}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8046a13e1ecd22488f6921102d63c0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  steps: []
+  material: {fileID: 2100000, guid: e0a0a74136bddee41b2990524aff3014, type: 2}
+  gridGenerator: {fileID: -2427032618139525839}
+--- !u!1 &839044455
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 839044456}
+  - component: {fileID: 839044457}
+  m_Layer: 0
+  m_Name: BuildingGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &839044456
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 839044455}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 0.63579}
+  m_Children: []
+  m_Father: {fileID: 6221010951936270790}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &839044457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 839044455}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8046a13e1ecd22488f6921102d63c0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  steps:
+  - minFloors: 3
+    maxFloors: 10
+    minRotation: -90
+    maxRotation: 90
+    isPolygon: 0
+    minVertices: 0
+    maxVertices: 0
+    minRadius: 0
+    maxRadius: 0
+    minWidth: 8
+    maxWidth: 10
+    minLength: 8
+    maxLength: 10
+  - minFloors: 3
+    maxFloors: 10
+    minRotation: 30
+    maxRotation: 60
+    isPolygon: 0
+    minVertices: 0
+    maxVertices: 0
+    minRadius: 0
+    maxRadius: 0
+    minWidth: 10
+    maxWidth: 10
+    minLength: 10
+    maxLength: 10
+  - minFloors: 3
+    maxFloors: 10
+    minRotation: 0
+    maxRotation: 0
+    isPolygon: 0
+    minVertices: 0
+    maxVertices: 0
+    minRadius: 0
+    maxRadius: 0
+    minWidth: 8
+    maxWidth: 10
+    minLength: 10
+    maxLength: 10
+  material: {fileID: 2100000, guid: e0a0a74136bddee41b2990524aff3014, type: 2}
+  gridGenerator: {fileID: -2427032618139525839}
+--- !u!1 &1136140660
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1136140661}
+  - component: {fileID: 1136140662}
+  m_Layer: 0
+  m_Name: BuildingGenerator (2)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1136140661
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1136140660}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 6221010951936270790}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1136140662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1136140660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8046a13e1ecd22488f6921102d63c0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  steps:
+  - minFloors: 1
+    maxFloors: 3
+    minRotation: -90
+    maxRotation: 90
+    isPolygon: 0
+    minVertices: 0
+    maxVertices: 0
+    minRadius: 0
+    maxRadius: 0
+    minWidth: 10
+    maxWidth: 10
+    minLength: 10
+    maxLength: 10
+  - minFloors: 1
+    maxFloors: 10
+    minRotation: -30
+    maxRotation: 60
+    isPolygon: 1
+    minVertices: 5
+    maxVertices: 8
+    minRadius: 3
+    maxRadius: 4
+    minWidth: 15
+    maxWidth: 15
+    minLength: 10
+    maxLength: 12
+  material: {fileID: 2100000, guid: 2814efe89a8138546b4ea099e9845bac, type: 2}
+  gridGenerator: {fileID: -2427032618139525839}
+--- !u!1 &1387498381
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1387498382}
+  - component: {fileID: 1387498383}
+  m_Layer: 0
+  m_Name: BuildingGenerator (3)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1387498382
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1387498381}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 6221010951936270790}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1387498383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1387498381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8046a13e1ecd22488f6921102d63c0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  steps:
+  - minFloors: 3
+    maxFloors: 10
+    minRotation: -90
+    maxRotation: 90
+    isPolygon: 0
+    minVertices: 0
+    maxVertices: 0
+    minRadius: 0
+    maxRadius: 0
+    minWidth: 10
+    maxWidth: 15
+    minLength: 8
+    maxLength: 10
+  - minFloors: 3
+    maxFloors: 10
+    minRotation: -90
+    maxRotation: 90
+    isPolygon: 0
+    minVertices: 0
+    maxVertices: 0
+    minRadius: 0
+    maxRadius: 0
+    minWidth: 8
+    maxWidth: 10
+    minLength: 7
+    maxLength: 10
+  material: {fileID: 2100000, guid: e0a0a74136bddee41b2990524aff3014, type: 2}
+  gridGenerator: {fileID: -2427032618139525839}
 --- !u!1 &6221010951936270787
 GameObject:
   m_ObjectHideFlags: 0
@@ -14,7 +289,7 @@ GameObject:
   - component: {fileID: -2427032618139525839}
   m_Layer: 0
   m_Name: GenerationCube
-  m_TagString: Untagged
+  m_TagString: ignore
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -28,8 +303,12 @@ Transform:
   m_GameObject: {fileID: 6221010951936270787}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 50, y: 0, z: 20}
-  m_LocalScale: {x: 284.65344, y: 284.65344, z: 284.65344}
-  m_Children: []
+  m_LocalScale: {x: 567.2113, y: 620.28436, z: 479.9283}
+  m_Children:
+  - {fileID: 839044456}
+  - {fileID: 1387498382}
+  - {fileID: 1136140661}
+  - {fileID: 3232616}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -92,4 +371,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae948734eb34a90448550da2804ff736, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cellSize: 10
+  automaticCellsize: 0
+  cellSize: 30
+  roadWidth: 3
+  perlinNoiseMultiplier: 0.1
+  streetDensity: 0.5
+  street: {fileID: 1363149465488317805, guid: f5179c7c016c1684b9cc17d5d8f697fe, type: 3}
+  crossroad: {fileID: 6743954100578698397, guid: 561dc697e9fd74a4c85caa0c4d299f9e,
+    type: 3}
+  TJunction: {fileID: 2841854345198842514, guid: e686c65192e7aa24890d7489d6c62692,
+    type: 3}
+  streetCorner: {fileID: 1374022504430940282, guid: 58314d1730c2eda428b88cd7c8738331,
+    type: 3}
+  streetEnd: {fileID: 4087788572802224189, guid: dce3281e67bfcfb47830bb19c7650e01,
+    type: 3}
+  connection: {fileID: 1363149465488317805, guid: f5179c7c016c1684b9cc17d5d8f697fe,
+    type: 3}

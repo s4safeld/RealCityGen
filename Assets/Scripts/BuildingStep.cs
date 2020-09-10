@@ -8,33 +8,33 @@ public class buildingStep
     public static bool generate = true;
 
     //Floors
-    public int minFloors;
-    public int maxFloors;
+    public  int minFloors;
+    public  int maxFloors;
     private int floors;
     //--------
 
     //Rotation Value
-    public float minRotation;
-    public float maxRotation;
+    public  float minRotation;
+    public  float maxRotation;
     private float rotation;
     //-------
 
     public bool isPolygon;
 
     //Polygon
-    public int minVertices;
-    public int maxVertices;
-    public float minRadius;
-    public float maxRadius;
+    public  int minVertices;
+    public  int maxVertices;
+    public  float minRadius;
+    public  float maxRadius;
     private int vertices;
     private float radius;
     //-------
 
     //Rectangle
-    public float minWidth;
-    public float maxWidth;
-    public float minLength;
-    public float maxLength;
+    public  float minWidth;
+    public  float maxWidth;
+    public  float minLength;
+    public  float maxLength;
     private float width;
     private float length;
     //--------
@@ -68,11 +68,11 @@ public class buildingStep
 
     public void initialise()
     {
-        floors = Random.Range(minFloors, maxFloors);
-        vertices = Random.Range(minVertices, maxVertices);
-        radius = Random.Range(minRadius, maxRadius);
-        width = Random.Range(minWidth, maxWidth);
-        length = Random.Range(minLength, maxLength);
-        rotation = Random.Range(minRotation, maxRotation);
+        floors      = Random.Range(minFloors,   maxFloors);
+        vertices    = Random.Range(minVertices, maxVertices);
+        radius      = Random.Range(minRadius,   maxRadius);
+        width       = Random.Range(minWidth,    maxWidth);
+        length      = Random.Range(minLength,   maxLength);
+        rotation    = Random.Range(minRotation, maxRotation);
     }
 }

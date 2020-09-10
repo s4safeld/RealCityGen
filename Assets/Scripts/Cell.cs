@@ -12,17 +12,17 @@ public class Cell : MonoBehaviour
     private Transform groundCursor;
     private int viewDistance;
     private float edgelength;
+    private bool spawnPosFound = false;
     public int localSeed;
     private GridGenerator gridGenerator;
     public BuildingGenerator buildingGenerator;
     public GameObject building;
+    public float spawnHeight;
 
     private bool generated = false;
     private bool generationAllowed = true;
     private bool disabled = false;
     private bool initialised = false;
-
-    private float distance;
 
     public void Initialise(BuildingGenerator bg)
     {
@@ -40,12 +40,11 @@ public class Cell : MonoBehaviour
     }
     public void Update()
     {
-        if (initialised)
+        if (initialised && GlobalInformation.player)
         {
-            distance = Vector3.Distance(groundCursor.position, transform.position);
-            if (distance < viewDistance)
+            if (Vector3.Distance(groundCursor.position, transform.position) < viewDistance)
             {
-                if (distance < edgelength * 2)
+                if (Vector3.Distance(groundCursor.position, transform.position) < edgelength * 2)
                 {
                     Generate();
                 }
@@ -56,7 +55,6 @@ public class Cell : MonoBehaviour
                         if (!generated)
                         {
                             GlobalInformation.cellsVisible++;
-                            //Debug.DrawLine(transform.position, groundCursor.position, Color.white);
                             Generate();
                         }
                     }
@@ -75,25 +73,22 @@ public class Cell : MonoBehaviour
                 unGenerate();
             }
         }
+        if (initialised && !GlobalInformation.player && !generated)
+        {
+            Generate();
+            generated = true;
+        }
     }
 
     void Generate()
     {
-        /*if (!initialised)
+        if (generationAllowed && !generated)
         {
-            cellCollider.transform.position = transform.position;
-            generationAllowed = cellCollider.GetComponent<CellCollider>().ask();
+            generated = true;
+            building = buildingGenerator.generate(localSeed);
+            building.transform.position = new Vector3(transform.position.x, spawnHeight+building.transform.position.y, transform.position.z);
+            building.transform.parent = transform;
         }
-        else
-        {*/
-            if (generationAllowed && !generated)
-            {
-                generated = true;
-                building = buildingGenerator.generate(localSeed);
-                building.transform.position = new Vector3(transform.position.x, building.transform.position.y, transform.position.z);
-                building.transform.parent = transform;
-        }
-        //}
     }
     void unGenerate()
     {
@@ -107,16 +102,24 @@ public class Cell : MonoBehaviour
 
     bool isInView()
     {
-        if (Vector3.Distance(groundCursor.position, transform.position) > 50) {
-            Vector3 targetDir = transform.position - groundCursor.position;
-            float angle = Vector3.Angle(targetDir, groundCursor.forward);
-            if (angle < (mainCam.fieldOfView))
+        if (GlobalInformation.player)
+        {
+            if (Vector3.Distance(groundCursor.position, transform.position) > 50)
+            {
+                Vector3 targetDir = transform.position - groundCursor.position;
+                float angle = Vector3.Angle(targetDir, groundCursor.forward);
+                return (angle < (mainCam.fieldOfView));
+            }
+            else
             {
                 return true;
             }
-            return false;
+
         }
-        return true;
+        else
+        {
+            return true;
+        }
     }
     IEnumerator DisableScript()
     {

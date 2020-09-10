@@ -11,6 +11,7 @@ public class BuildingGenerator : MonoBehaviour
     public buildingStep[] steps;
     public Material material;
     public GridGenerator gridGenerator;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -37,11 +38,11 @@ public class BuildingGenerator : MonoBehaviour
             {
                 Mesh polygon = SimplePolygon.polygon(steps[i].getRadius(), steps[i].getVertices());
                 Mesh mesh;
-                mesh = extrudeMesh(polygon, new Vector3(0, -height, 0));
+                mesh = extrudeMesh(polygon, new Vector3(0, -height*2, 0));
                 mesh = moveMesh(mesh, new Vector3(
-                    Random.Range(0, gridGenerator.cellSize/2 - steps[i].getRadius()),
+                    Random.Range(-(gridGenerator.cellSize / 2 - steps[i].getRadius() * 2), gridGenerator.cellSize/2 - steps[i].getRadius()*2),
                     -heightGenerated,
-                    Random.Range(0, gridGenerator.cellSize/2 - steps[i].getRadius())
+                    Random.Range(-(gridGenerator.cellSize / 2 - steps[i].getRadius() * 2), gridGenerator.cellSize/2 - steps[i].getRadius()*2)
                 ));
                 mesh.RecalculateBounds();
                 mesh.RecalculateNormals();
@@ -55,11 +56,11 @@ public class BuildingGenerator : MonoBehaviour
             {
                 Mesh polygon = SimplePolygon.rectangle(steps[i].getWidth(), steps[i].getLength());
                 Mesh mesh;
-                mesh = extrudeMesh(polygon, new Vector3(0, -height, 0));
+                mesh = extrudeMesh(polygon, new Vector3(0, -height*2, 0));
                 mesh = moveMesh(mesh, new Vector3(
-                    Random.Range(0, gridGenerator.cellSize/2 - Mathf.Sqrt(steps[i].getLength()* steps[i].getLength() + steps[i].getWidth()* steps[i].getWidth())),
+                    Random.Range(-(gridGenerator.cellSize / 2 - Mathf.Sqrt(steps[i].getLength() * steps[i].getLength() + steps[i].getWidth() * steps[i].getWidth())), gridGenerator.cellSize/2 - Mathf.Sqrt(steps[i].getLength()* steps[i].getLength() + steps[i].getWidth()* steps[i].getWidth())),
                     -heightGenerated,
-                    Random.Range(0, gridGenerator.cellSize/2 - Mathf.Sqrt(steps[i].getLength() * steps[i].getLength() + steps[i].getWidth() * steps[i].getWidth()))
+                    Random.Range(-(gridGenerator.cellSize / 2 - Mathf.Sqrt(steps[i].getLength() * steps[i].getLength() + steps[i].getWidth() * steps[i].getWidth())), gridGenerator.cellSize/2 - Mathf.Sqrt(steps[i].getLength() * steps[i].getLength() + steps[i].getWidth() * steps[i].getWidth()))
                 ));
                 mesh.RecalculateBounds();
                 mesh.RecalculateNormals();
@@ -96,8 +97,8 @@ public class BuildingGenerator : MonoBehaviour
         building.GetComponent<Renderer>().material = material;
         building.AddComponent<MeshCollider>();
 
-        building.GetComponent<MeshFilter>().mesh.uv[0] = new Vector2(0, 0);
-        building.GetComponent<MeshFilter>().mesh.uv[building.GetComponent<MeshFilter>().mesh.uv.Length-1] = new Vector2(1, 1);
+        //building.GetComponent<MeshFilter>().mesh.uv[0] = new Vector2(0, 0);
+        //building.GetComponent<MeshFilter>().mesh.uv[building.GetComponent<MeshFilter>().mesh.uv.Length-1] = new Vector2(1, 1);
 
         return building;
     }

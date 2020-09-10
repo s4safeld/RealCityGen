@@ -65,8 +65,8 @@
     <Compile Include="Assets\Scripts\BuildingGenerator.cs" />
     <Compile Include="Assets\Scripts\BuildingStep.cs" />
     <Compile Include="Assets\Scripts\Cell.cs" />
-    <Compile Include="Assets\Scripts\CellCollider.cs" />
     <Compile Include="Assets\Scripts\Deprecated\Building.cs" />
+    <Compile Include="Assets\Scripts\Deprecated\CellCollider.cs" />
     <Compile Include="Assets\Scripts\Deprecated\CreateMeshCollider.cs" />
     <Compile Include="Assets\Scripts\Deprecated\DrawFrustumCorners.cs" />
     <Compile Include="Assets\Scripts\Deprecated\GridGeneratorOld.cs" />

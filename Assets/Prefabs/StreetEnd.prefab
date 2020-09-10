@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 413852098830091080}
   m_Layer: 0
   m_Name: StreetEnd
-  m_TagString: Untagged
+  m_TagString: ignore
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

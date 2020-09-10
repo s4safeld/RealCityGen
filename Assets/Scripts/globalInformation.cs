@@ -8,10 +8,12 @@ public class GlobalInformation : MonoBehaviour
     public int setViewDistance;
     public GameObject setPlayer;
     public string setWorldSeed;
+    public GameObject setTerrain;
 
     public static int viewDistance;
     public static GameObject groundCursor;
     public static GameObject player;
+    public static GameObject terrain;
     public static ArrayList GenerationCubes;
     public static int worldSeed;
     public static int cellsVisible = 0;
@@ -26,23 +28,30 @@ public class GlobalInformation : MonoBehaviour
         {
             worldSeed = UnityEngine.Random.Range(0, 10000000).GetHashCode();
         }
-        Debug.Log(worldSeed);
+        Debug.Log("WorldSeed: "+worldSeed);
 
         viewDistance = setViewDistance;
-        player = setPlayer;
+        terrain = setTerrain;
 
+        terrain.gameObject.tag = "ignore";
+
+
+        if (setPlayer)
+        {
+            player = setPlayer;
+            player.tag = "ignore";
+        }
         groundCursor = new GameObject();
         groundCursor.name = "GroundCursor";
     }
 
     void Update()
     {
-        groundCursor.transform.position = new Vector3(player.transform.position.x, 0, player.transform.position.z);
-        groundCursor.transform.rotation = player.transform.rotation;
-
-        //Debugging
-        //Debug.DrawLine(new Vector3(0, 100, 0), new Vector3(0, 100, 30));
-        //-----------
+        if (player)
+        {
+            groundCursor.transform.position = new Vector3(player.transform.position.x, 0, player.transform.position.z);
+            groundCursor.transform.rotation = player.transform.rotation;
+        }
     }
 
     public static Vector2 get2DBounds(GameObject obj)

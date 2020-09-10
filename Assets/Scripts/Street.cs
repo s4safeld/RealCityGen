@@ -16,9 +16,11 @@ public class Street : MonoBehaviour
     public bool streetEast;
     public bool streetSouth;
     public bool streetWest;
+    public Vector3 spawnPos;
 
     private void Start()
     {
+        spawnPos = transform.position;
         node = new Node(new Vector3());
         groundCursor = GlobalInformation.groundCursor.transform;
         mainCam = Camera.main;
@@ -26,7 +28,8 @@ public class Street : MonoBehaviour
         viewDistance = GlobalInformation.viewDistance;
         light = GetComponentInChildren<Light>();
         try { light.enabled = false; } catch (Exception) { }
-        mr.enabled = false;
+
+        MeshFilter[] mfs = transform.GetComponentsInChildren<MeshFilter>();
     }
 
     public void setNode(Node input)
@@ -40,7 +43,7 @@ public class Street : MonoBehaviour
 
     private void Update()
     {
-        if(Vector3.Distance(groundCursor.position, transform.position) < viewDistance)
+        if(Vector3.Distance(groundCursor.position, transform.position) < viewDistance && GlobalInformation.player)
         {
             if (isInView() && !mrEnabled)
             {
@@ -48,7 +51,7 @@ public class Street : MonoBehaviour
                 foreach (MeshRenderer obj in transform.GetComponentsInChildren<MeshRenderer>())
                     obj.GetComponent<MeshRenderer>().enabled = true;
                 mrEnabled = true;
-                try { light.enabled = false; } catch (Exception) { }
+                try { light.enabled = true; } catch (Exception) { }
             }
             else
             {
@@ -65,25 +68,45 @@ public class Street : MonoBehaviour
         }
         else
         {
-            mr.enabled = false;
-            foreach (MeshRenderer obj in GetComponentsInChildren<MeshRenderer>())
-                obj.GetComponent<MeshRenderer>().enabled = false;
-            try { light.enabled = false; } catch (Exception) { }
+            if (GlobalInformation.player)
+            {
+                mr.enabled = false;
+                mrEnabled = false;
+                foreach (MeshRenderer obj in GetComponentsInChildren<MeshRenderer>())
+                    obj.GetComponent<MeshRenderer>().enabled = false;
+                try { light.enabled = false; } catch (Exception) { }
+            }
+            else
+            {
+                mr.enabled = true;
+                foreach (MeshRenderer obj in transform.GetComponentsInChildren<MeshRenderer>())
+                    obj.GetComponent<MeshRenderer>().enabled = true;
+                mrEnabled = true;
+                try { light.enabled = true; } catch (Exception) { }
+            }
+            
         }
     }
 
     bool isInView()
     {
-        if (Vector3.Distance(groundCursor.position, transform.position) > 50)
+        if (GlobalInformation.player)
         {
-            Vector3 targetDir = transform.position - groundCursor.position;
-            float angle = Vector3.Angle(targetDir, groundCursor.forward);
-            if (angle < (mainCam.fieldOfView))
+            if (Vector3.Distance(groundCursor.position, transform.position) > 50)
+            {
+                Vector3 targetDir = transform.position - groundCursor.position;
+                float angle = Vector3.Angle(targetDir, groundCursor.forward);
+                return angle < mainCam.fieldOfView;
+            }
+            else
             {
                 return true;
             }
-            return false;
         }
-        return true;
+        else
+        {
+            return true;
+        }
+        
     }
 }

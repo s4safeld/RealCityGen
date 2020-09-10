@@ -11,7 +11,6 @@ public class GridGenerator : MonoBehaviour
     public int roadWidth;
     public float perlinNoiseMultiplier;
     public float streetDensity;
-    public bool automaticStreetScale;
 
     public GameObject street;
     public GameObject crossroad;
@@ -26,7 +25,9 @@ public class GridGenerator : MonoBehaviour
     private GameObject[,] cellGrid;
     private Node[,] streetGrid;
     private GameObject cellCollider;
-    
+    private Quaternion cubeRotation;
+    private float PerlinOffset;
+
     public GameObject getCellCollider()
     {
         return cellCollider;
@@ -34,10 +35,25 @@ public class GridGenerator : MonoBehaviour
 
     void Start()
     {
-        //cellCollider = (GameObject)Instantiate(Resources.Load("Assets/Prefabs/CellCollider", typeof(GameObject)),gameObject.transform);
+        Random.InitState(GlobalInformation.hash(GlobalInformation.worldSeed ^ gameObject.name.GetHashCode()));
+        PerlinOffset = Random.Range(0,100);
+
+        cubeRotation = transform.rotation;
+        transform.rotation = Quaternion.identity;
+
         cellCollider = new GameObject();
         generators = GetComponentsInChildren<BuildingGenerator>();
-
+        ArrayList obstacles = new ArrayList();
+        foreach (Collider col in FindObjectsOfType<Collider>())
+        {
+            if (!col.CompareTag("ignore"))
+            {
+                Debug.Log(col.name + " is added to obstacles by "+name);
+                obstacles.Add(col);
+            }
+        }
+        Debug.Log(name);
+        //compute cellSize by computing maximum building dimensions
         if (automaticCellsize)
         {
             float biggestSize = 0;
@@ -65,24 +81,62 @@ public class GridGenerator : MonoBehaviour
             }
             cellSize = Mathf.CeilToInt(biggestSize) + roadWidth / 4;
         }
-        if (automaticStreetScale)
-        {
-            //TODO
-        }
+        //---------------------------------------------------------
+
         areaLength = GlobalInformation.get2DBounds(gameObject).x;
         areaWidth = GlobalInformation.get2DBounds(gameObject).y;
-
+        //Generate cellgrid
         GameObject cellGridParent = new GameObject();
-        cellGridParent.name = "CellGrid";
+        cellGridParent.name = "CellGrid"+name;
         cellGridParent.transform.parent = transform;
         cellGrid = generateCellGrid(cellGridParent.transform);
-
+        //Generate streetGrid
         GameObject streetGridParent = new GameObject();
-        streetGridParent.name = "StreetGrid";
+        streetGridParent.name = "StreetGrid"+name;
         streetGridParent.transform.parent = transform;
         streetGrid = generateStreetGrid(streetGridParent.transform);
+        //Delete Grid where Obstacles are found
+        foreach (Collider col in obstacles)
+        {
+            RaycastHit hit;
+            Ray ray;
+            foreach(Transform obj in streetGridParent.GetComponentsInChildren<Transform>())
+            {
+                //Check if obj is within obstacle
+                try{ 
+                    Vector3 offset = col.bounds.center - obj.position;
+                    ray = new Ray(obj.position, offset.normalized);
+                    if (!col.Raycast(ray, out hit, offset.magnitude * 1.1f))
+                    {
+                        Debug.Log(obj.name + "will be destroyed");
+                        Destroy(obj.gameObject);
+                    }
+                } catch (Exception e) { Debug.LogWarning(e); }
+            }
+            foreach (Transform obj in cellGridParent.GetComponentsInChildren<Transform>())
+            {
+                //Check if obj is within obstacle
+                try{
+                    Vector3 offset = col.bounds.center - obj.position;
+                    ray = new Ray(obj.position, offset.normalized);
+                    if (!col.Raycast(ray, out hit, offset.magnitude * 1.1f))
+                    {
+                        Debug.Log(obj.name + "will be destroyed");
+                        Destroy(obj.gameObject);
+                    }
+                        
+                } catch (Exception e) { Debug.LogWarning(e); }
+            }
+        }
+        //--------------------------------
+
+        foreach(Collider col in GetComponentsInChildren<Collider>())
+        {
+            col.gameObject.tag = "ignore";
+        }
 
         gameObject.GetComponent<MeshRenderer>().enabled = false;
+        transform.rotation = cubeRotation;
     }
 
     GameObject[,] generateCellGrid(Transform parent)
@@ -93,17 +147,20 @@ public class GridGenerator : MonoBehaviour
         {
             for(int j = 0; j<(int)areaWidth/cellSize; j++)
             {
+                //Instantiate cell-----------------
                 GameObject cell = new GameObject();
+                cell.transform.parent = parent;
+                cell.AddComponent<Cell>();
                 cell.transform.position = new Vector3(
                     cellSize/2+(i*cellSize)+(transform.position.x - areaLength/2), 
                     0,
                     cellSize/2+(j*cellSize)+(transform.position.z - areaWidth/2)
                 );
-                cell.transform.parent = parent;
                 cell.name = "cell" + cell.transform.position;
-                cell.AddComponent<Cell>();
-                value = Mathf.PerlinNoise(i*perlinNoiseMultiplier,j*perlinNoiseMultiplier);
-                //Debug.Log(value+", i: "+i+", j:"+j);
+                //------------------------------
+
+                //Initialise Cell by picking a generator using Perlin Noise
+                value = Mathf.PerlinNoise(i*perlinNoiseMultiplier+PerlinOffset,j*perlinNoiseMultiplier+PerlinOffset);
                 float step = 1 / (float)generators.Length;
                 for(int k = 0; k<generators.Length; k++)
                 {
@@ -113,6 +170,29 @@ public class GridGenerator : MonoBehaviour
                         break;
                     }
                 }
+                //--------------------------------------------------------
+
+                int l = 0;
+                bool found = false;
+                while (!found)
+                {
+                    RaycastHit hit;
+                    if (Physics.Raycast(new Vector3(cell.transform.position.x, l, cell.transform.position.z), transform.TransformDirection(-Vector3.up), out hit))
+                    {
+                        if (hit.collider.gameObject == GlobalInformation.terrain)
+                        {
+                            if (hit.point.y > cell.GetComponent<Cell>().spawnHeight)
+                                cell.GetComponent<Cell>().spawnHeight = hit.point.y;
+                            found = true;
+                        }
+                    }
+                    l++;
+                    if (l > 100)
+                    {
+                        Debug.LogError("Something is wrong, is there terrain?");
+                        found = true;
+                    }
+                }
                 grid[i, j] = cell;
             }
         }
@@ -120,12 +200,12 @@ public class GridGenerator : MonoBehaviour
     }
     Node[,] generateStreetGrid(Transform parent)
     {
+        //Lay out grid of nodes
         Node[,] grid = new Node[(int)areaLength/cellSize, (int)areaWidth/cellSize];
         for(int i = 0; i<grid.GetLength(0); i++)
         {
             for (int j = 0; j < grid.GetLength(1); j++)
             {
-                //Debug.Log("i:" + i + "| j:" + j);
                 grid[i, j] = new Node(new Vector3(
                     cellGrid[i, j].transform.position.x + cellSize/2,
                     0,
@@ -133,9 +213,11 @@ public class GridGenerator : MonoBehaviour
                 ));
             }
         }
+        //-----------------------
 
         Random.InitState(GlobalInformation.hash(GlobalInformation.worldSeed ^ gameObject.name.GetHashCode()));
 
+        //Instantiate street Grid in random fashion---------
         for (int i = 0; i < (int)areaLength / cellSize; i++)
         {
             for (int j = 0; j < (int)areaWidth / cellSize; j++)
@@ -163,47 +245,89 @@ public class GridGenerator : MonoBehaviour
                 }
             }
         }
+        //---------------------------------------------------
         
-        //Connect the streets
+        //Connect the streets--------------------------------
         GameObject con = new GameObject();
         foreach (Node n in grid)
         {
-            if (n.roadNorth && n.roadSouth && n.roadEast && n.roadWest)
+            if (n.roadNorth && n.roadSouth && n.roadEast && n.roadWest)     //crossroad
                 con = crossRoad(n);
-            if (n.roadNorth && n.roadSouth && n.roadEast && !n.roadWest)
+            if (!n.roadNorth && n.roadSouth && n.roadEast && n.roadWest)    //T-junction w/o North
                 con = tJunction(n);
-            if (!n.roadNorth && n.roadSouth && n.roadEast && n.roadWest)
+            if (n.roadNorth && n.roadSouth && !n.roadEast && n.roadWest)    //T-junction w/o East
                 con = tJunction(n);
-            if (n.roadNorth && n.roadSouth && !n.roadEast && n.roadWest)
+            if (n.roadNorth && !n.roadSouth && n.roadEast && n.roadWest)    //T-junction w/o South
                 con = tJunction(n);
-            if (n.roadNorth && !n.roadSouth && n.roadEast && n.roadWest)
+            if (n.roadNorth && n.roadSouth && n.roadEast && !n.roadWest)    //T-junction w/o West
                 con = tJunction(n);
-            if (!n.roadNorth && !n.roadSouth && n.roadEast && n.roadWest)
+            if (!n.roadNorth && !n.roadSouth && n.roadEast && n.roadWest)   //Connect 2 horizontal streets
                 con = connectHorizontal(n);
-            if (n.roadNorth && n.roadSouth && !n.roadEast && !n.roadWest)
+            if (n.roadNorth && n.roadSouth && !n.roadEast && !n.roadWest)   //Connect 2 vertical streets
                 con = connectVertical(n);
-            if (n.roadNorth && !n.roadSouth && n.roadEast && !n.roadWest)
+            if (n.roadNorth && !n.roadSouth && n.roadEast && !n.roadWest)   //Corner N/E
                 con = corner(n);
-            if (!n.roadNorth && n.roadSouth && n.roadEast && !n.roadWest)
+            if (!n.roadNorth && n.roadSouth && n.roadEast && !n.roadWest)   //Corner E/S
                 con = corner(n);
-            if (!n.roadNorth && n.roadSouth && !n.roadEast && n.roadWest)
+            if (!n.roadNorth && n.roadSouth && !n.roadEast && n.roadWest)   //Corner S/W
                 con = corner(n);
-            if(n.roadNorth && !n.roadSouth && !n.roadEast && n.roadWest)
+            if(n.roadNorth && !n.roadSouth && !n.roadEast && n.roadWest)    //Corner W/N
                 con = corner(n);
-            if (n.roadNorth && !n.roadSouth && !n.roadEast && !n.roadWest)
+            if (n.roadNorth && !n.roadSouth && !n.roadEast && !n.roadWest)  //end N
                 con = end(n);
-            if (!n.roadNorth && n.roadSouth && !n.roadEast && !n.roadWest)
+            if (!n.roadNorth && !n.roadSouth && n.roadEast && !n.roadWest)  //end E
                 con = end(n);
-            if (!n.roadNorth && !n.roadSouth && n.roadEast && !n.roadWest)
+            if (!n.roadNorth && n.roadSouth && !n.roadEast && !n.roadWest)  //end S
                 con = end(n);
-            if (!n.roadNorth && !n.roadSouth && !n.roadEast && n.roadWest)
+            if (!n.roadNorth && !n.roadSouth && !n.roadEast && n.roadWest)  //end W
                 con = end(n);
+
+            //If node has got a gameobject
+            try { con.GetComponent<Street>().setNode(n); n.inheritor = con; } catch (Exception) { }
+
+            //add connection to street parent
             con.transform.parent = parent;
-            try { con.GetComponent<Street>().setNode(n); } catch (Exception) { }
         }
+        //---------------------------------------------------
+
+        //Set height of all streets------------------------------
+        float spawnHeight = 0;
+        foreach(Node n in grid)
+        {
+            int i = 0;
+            bool found = false;
+            //Get height of terrain at every node
+            while (!found)
+            {
+                RaycastHit hit;
+                if (Physics.Raycast(new Vector3(n.position.x, i, n.position.z), transform.TransformDirection(-Vector3.up), out hit))
+                {
+                    if (hit.collider.gameObject == GlobalInformation.terrain)
+                    {
+                        if (hit.point.y > spawnHeight)
+                            spawnHeight = hit.point.y+0.1f;
+                        found = true;
+                    }
+                }
+                i++;
+                if (i > 100)
+                {
+                    Debug.LogError("Something is wrong, is there terrain?");
+                    found = true;
+                }
+            }
+        }
+        foreach(Transform child in parent.GetComponentsInChildren<Transform>())
+        {
+            if(child.GetComponent<Street>())
+                child.position = new Vector3(child.position.x, spawnHeight + 0.1f, child.position.z);
+        }
+        //------------------------------------------------------
+
         return grid;
     }
 
+    //Support functions for Streetgeneration--------------------
     private GameObject end(Node node)
     {
         GameObject end = Instantiate(streetEnd, new Vector3(node.position.x, node.position.y+0.1f, node.position.z), streetEnd.transform.rotation);
@@ -314,4 +438,5 @@ public class GridGenerator : MonoBehaviour
 
         return con;
     }
+    //-----------------------------------------------------------
 }
