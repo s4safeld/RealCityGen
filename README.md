@@ -1,6 +1,6 @@
 # RealCityGen
 
-This Project was for an University Project. A [Video](https://drive.google.com/file/d/1RaybepdfP0eSiYIlqkqS8SMPMzD0wfhH/view?usp=sharing) of it in action
+This Project was made for an University Project. A [Video](https://drive.google.com/file/d/1RaybepdfP0eSiYIlqkqS8SMPMzD0wfhH/view?usp=sharing) of it in action
 
 # Intro
 
