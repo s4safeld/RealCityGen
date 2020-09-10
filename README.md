@@ -19,19 +19,24 @@ I recommend downloading the whole project and exploring the Example Scene to bec
 
 But to be able use the software you just need to do the following: 
 
-1. Go to the script folder and import all the scripts into your project.
+1. import all the scripts from the [Scripts Folder](https://github.com/s4safeld/RealCityGen/tree/master/Assets/Scripts) into your project.
 
 2. Make an empty GameObject and drag the GlobalInformation Script onto it
 
 3. Take any cube and add the GridGenerator Script to it
 
-4. Add a few empty GameObjects as childs to the Cube 
+4. Make the size of the cube so that it covers the area where you want a city generated
 
-5. add the BuildingGenerator Script to each of them
+5. Add a few empty GameObjects as childs to the Cube 
 
-6. Now fill out all the values of the Scripts
+6. add the BuildingGenerator Script to each of them
+
+7. Now fill out all the values of the Scripts
 
 If you need help with the last point check out the documentation below or contact me.
+
+Note that the Code is 100% written by me except for the [Triangulator.cs](https://github.com/s4safeld/RealCityGen/blob/master/Assets/Scripts/Triangulator.cs), a class that creates surface-triangles for any 2D mesh.
+[Source](http://wiki.unity3d.com/index.php?title=Triangulator&_ga=2.97540694.871866967.1597588282-744620994.1584369047)
 
 # Documentation
 
@@ -43,6 +48,7 @@ The Range  in which streets and buildings are generated, if they are further awa
 
 **Set Player:**
 The Gameobject of the Player, used to compute the render distances.
+This can be left empty, then there won't be any View Frustum Filling happening and all the Buildings will be generated once.
 
 **Set World Seed:**
 A string that will serve as the world seed, to generate a random seed: Type "null".
